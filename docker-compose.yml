@@ -1,0 +1,43 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mmonet
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/mmostore
+    depends_on:
+      - mongo
+    ports:
+      - "5000:5000"
+    networks:
+      - mmonet
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Doi thanh domain backend that khi deploy production, vd: https://api.yourdomain.com/api
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:5000/api}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - mmonet
+
+volumes:
+  mongo_data:
+
+networks:
+  mmonet:
+    driver: bridge

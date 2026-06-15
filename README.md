@@ -1,93 +1,138 @@
-# mmo-store
+# MMO Store
 
+He thong **website + Telegram bot** ban san pham MMO (digital products: tai khoan, proxy, tool, sms, the cao, khoa hoc, data...). Giao hang **tu dong** sau khi thanh toan, ho tro **affiliate 10%**, **admin panel** day du.
 
+## Cong nghe
+- **Frontend:** React 18 + Vite + Tailwind CSS + Framer Motion + React Router DOM
+- **Backend:** Node.js + Express + MongoDB (Mongoose) + JWT
+- **Telegram bot:** node-telegram-bot-api (webhook, co polling cho dev)
+- **Thanh toan:** USDT TRC20 (TronGrid), VietQR/Bank (Casso webhook), The cao (TheSieuRe)
+- **Email:** Nodemailer SMTP
+- **Deploy:** Docker + docker-compose
 
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
+## Cau truc
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/trunghuy242-group/mmo-store.git
-git branch -M main
-git push -uf origin main
+mmo-store/
+  backend/         # Express API + Telegram bot + payment + cron
+  frontend/        # React + Vite + Tailwind
+  docker-compose.yml
 ```
 
-## Integrate with your tools
+## Tinh nang chinh
+- Dang ky / dang nhap (JWT), lien ket Telegram
+- Danh sach san pham theo danh muc + tim kiem + flash sale countdown
+- Gio hang / checkout, **auto-delivery** qua email + Telegram
+- Affiliate 10% hoa hong, rut tien
+- Live inventory (kho tu giam, admin nap them)
+- Admin: CRUD san pham/danh muc, duyet don, sua so du, export Excel, broadcast Telegram
+- Tu dong: canh bao het hang (<5), bao cao doanh thu hang ngay qua Telegram
 
-* [Set up project integrations](https://gitlab.com/trunghuy242-group/mmo-store/-/settings/integrations)
+## Bao mat
+- Secret nam trong `.env` (khong commit). Co `.env.example`, `.gitignore` chan `.env` that.
+- Webhook Casso/Telegram/the cao deu verify chu ky/secret.
+- Du lieu giao hang nhay cam (user/pass) duoc **ma hoa AES-256-GCM** trong DB.
+- Mat khau hash bcrypt, JWT co expiry, rate limit, helmet, CORS.
 
-## Collaborate with your team
+---
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+## 1. Chay che do DEV (khong Docker)
 
-## Test and Deploy
+### Backend
+```bash
+cd backend
+cp .env.example .env   # dien cac bien (xem ben duoi)
+npm install
+npm run seed           # tao admin + danh muc + san pham mau
+npm run dev            # chay tai http://localhost:5000
+```
 
-Use the built-in continuous integration in GitLab.
+### Frontend
+```bash
+cd frontend
+cp .env.example .env   # VITE_API_URL=http://localhost:5000/api
+npm install
+npm run dev            # chay tai http://localhost:5173
+```
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+Dang nhap admin mac dinh: email/password lay tu `ADMIN_EMAIL` / `ADMIN_PASSWORD` trong `backend/.env`.
 
-***
+---
 
-# Editing this README
+## 2. Chay bang Docker (khuyen nghi cho VPS)
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```bash
+# 1. Tao file env cho backend
+cp backend/.env.example backend/.env
+# Sua backend/.env: dien JWT_SECRET, ENCRYPTION_KEY (32 ky tu), token telegram, key thanh toan, SMTP...
+# Luu y: trong Docker, MONGO_URI da duoc set san = mongodb://mongo:27017/mmostore
 
-## Suggestions for a good README
+# 2. (Tuy chon) tao .env o root de doi VITE_API_URL cho frontend khi deploy production
+cp .env.example .env
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+# 3. Build & chay
+docker compose up -d --build
 
-## Name
-Choose a self-explaining name for your project.
+# 4. Seed du lieu (admin + san pham mau)
+docker compose exec backend npm run seed
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+- Frontend: http://localhost (port 80)
+- Backend API: http://localhost:5000/api
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Khi deploy production: tro domain frontend vao port 80, va dat `VITE_API_URL=https://api.yourdomain.com/api` (build lai frontend), `PUBLIC_BASE_URL=https://api.yourdomain.com` trong backend/.env.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+---
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## 3. Cau hinh cac bien moi truong (backend/.env)
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+| Bien | Mo ta |
+|------|-------|
+| `JWT_SECRET` | Chuoi ngau nhien dai de ky JWT |
+| `ENCRYPTION_KEY` | **Dung 32 ky tu** - khoa AES ma hoa du lieu giao hang |
+| `TELEGRAM_BOT_TOKEN` | Token bot tu @BotFather |
+| `TELEGRAM_ADMIN_CHAT_ID` | Chat ID admin nhan canh bao/bao cao |
+| `TELEGRAM_USE_WEBHOOK` | `true` cho production (VPS HTTPS), `false` cho dev (polling) |
+| `TELEGRAM_WEBHOOK_SECRET` | Secret bao ve endpoint webhook telegram |
+| `TRONGRID_API_KEY` | API key TronGrid (USDT TRC20) |
+| `USDT_WALLET_ADDRESS` | Dia chi vi nhan USDT |
+| `BANK_ID` / `BANK_ACCOUNT_NO` / `BANK_ACCOUNT_NAME` | Thong tin tao VietQR |
+| `CASSO_WEBHOOK_SECRET` | Secure-Token Casso gui kem webhook (bat buoc) |
+| `THESIEURE_PARTNER_ID` / `THESIEURE_PARTNER_KEY` | Key gach the cao |
+| `SMTP_*` / `MAIL_FROM` | Cau hinh gui email |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Tai khoan admin tao boi seed |
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+---
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## 4. Cau hinh Telegram webhook
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Khi `TELEGRAM_USE_WEBHOOK=true`, backend tu dong goi `setWebHook` toi:
+```
+{PUBLIC_BASE_URL}/api/telegram/webhook/{TELEGRAM_WEBHOOK_SECRET}
+```
+Dam bao `PUBLIC_BASE_URL` la domain HTTPS cong khai cua VPS. Bot cac lenh: `/start`, `/products`, `/order [id]`, `/status [ma]`, `/aff`, `/help`.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+Lien ket tai khoan: user can co `telegramId` trong DB (admin co the gan, hoac mo rong them luong lien ket qua bot).
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+---
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## 5. Cau hinh webhook Casso (VietQR auto-check)
 
-## License
-For open source projects, say how it is licensed.
+1. Dang ky tai khoan **Casso**, lien ket ngan hang.
+2. Tao webhook tro toi: `https://api.yourdomain.com/api/payment/casso/webhook`
+3. Dat **Secure-Token** trung voi `CASSO_WEBHOOK_SECRET` trong `.env`.
+4. Khi khach chuyen khoan voi noi dung chua **ma don** (vd `MMOABC123`), Casso gui webhook, he thong tu doi chieu va giao hang.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+---
+
+## 6. Luong thanh toan
+
+- **So du:** tru truc tiep, giao hang ngay.
+- **VietQR/Bank:** hien QR -> khach CK noi dung = ma don -> Casso webhook -> auto giao. (Hoac admin bam "Xac nhan".)
+- **USDT TRC20:** khach chuyen dung so tien -> bam "kiem tra" hoac he thong doi chieu TronGrid -> auto giao.
+- **The cao:** nhap ma+serial -> gach qua TheSieuRe (thieu key thi admin xac nhan thu cong).
+
+---
+
+## Ghi chu
+- Day la nen tang day du, co the mo rong them (vi du: luong lien ket Telegram tu dong, them cong thanh toan, gio hang nhieu san pham).
+- **Nho doi tat ca secret mac dinh truoc khi len production.**
