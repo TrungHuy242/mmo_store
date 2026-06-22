@@ -1,24 +1,24 @@
 import { verifyToken } from '../utils/token.js';
-import User from '../models/User.js';
+import { findUserById } from '../repositories/userRepository.js';
 
 export async function authRequired(req, res, next) {
   try {
     const header = req.headers.authorization || '';
     const token = header.startsWith('Bearer ') ? header.slice(7) : null;
-    if (!token) return res.status(401).json({ message: 'Chua dang nhap' });
+    if (!token) return res.status(401).json({ message: 'Chưa đăng nhập' });
     const decoded = verifyToken(token);
-    const user = await User.findById(decoded.id).select('-password');
-    if (!user) return res.status(401).json({ message: 'Token khong hop le' });
+    const user = await findUserById(decoded.id);
+    if (!user) return res.status(401).json({ message: 'Token không hợp lệ' });
     req.user = user;
     next();
   } catch (err) {
-    return res.status(401).json({ message: 'Token het han hoac khong hop le' });
+    return res.status(401).json({ message: 'Token hết hạn hoặc không hợp lệ' });
   }
 }
 
 export function adminRequired(req, res, next) {
   if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Chi admin moi co quyen' });
+    return res.status(403).json({ message: 'Chỉ admin mới có quyền' });
   }
   next();
 }

@@ -9,7 +9,7 @@ export function getBot() {
 
 export function initBot() {
   if (!config.telegram.token) {
-    console.warn('[telegram] Chua cau hinh TELEGRAM_BOT_TOKEN, bot khong khoi dong.');
+    console.warn('[telegram] Chưa cấu hình TELEGRAM_BOT_TOKEN, bot không khởi động.');
     return null;
   }
   if (config.telegram.useWebhook) {

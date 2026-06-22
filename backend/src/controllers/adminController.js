@@ -1,43 +1,65 @@
 import ExcelJS from 'exceljs';
-import Order from '../models/Order.js';
-import User from '../models/User.js';
-import Withdrawal from '../models/Withdrawal.js';
 import { fulfillOrder } from '../services/deliveryService.js';
 import { sendTelegram } from '../services/telegramService.js';
+import { findOrderById, listOrders as fetchOrderList, updateOrder, countOrders, sumRevenue, listRecentOrders } from '../repositories/orderRepository.js';
+import { findUserById, listUsers as fetchUsers, listUsersWithTelegram, updateUser, countUsers } from '../repositories/userRepository.js';
+import { countProducts } from '../repositories/productRepository.js';
+import { findWithdrawalById, listWithdrawals as fetchWithdrawals, updateWithdrawal } from '../repositories/withdrawalRepository.js';
+
+export async function getStats(req, res) {
+  const [totalOrders, totalRevenue, totalUsers, totalProducts, recentOrders] = await Promise.all([
+    countOrders(),
+    sumRevenue(),
+    countUsers(),
+    countProducts(),
+    listRecentOrders(10),
+  ]);
+  res.json({
+    totalOrders,
+    totalRevenue,
+    totalUsers,
+    totalProducts,
+    recentOrders,
+  });
+}
 
 export async function listOrders(req, res) {
-  const orders = await Order.find().populate('user', 'email').sort({ createdAt: -1 }).limit(500);
+  const orders = await fetchOrderList();
   res.json(orders);
 }
 
 // Admin danh dau don da thanh toan (cho bank/card thu cong)
 export async function markPaid(req, res) {
-  const order = await Order.findById(req.params.id);
-  if (!order) return res.status(404).json({ message: 'Khong tim thay don' });
-  if (order.status === 'delivered') return res.json({ order, message: 'Don da giao' });
-  order.status = 'paid';
-  await order.save();
-  await fulfillOrder(order);
-  res.json({ order, message: 'Da xac nhan va giao hang' });
+  const order = await findOrderById(req.params.id);
+  if (!order) return res.status(404).json({ message: 'Không tìm thấy đơn' });
+  if (order.status === 'delivered') return res.json({ order, message: 'Đơn đã giao' });
+  const updated = await updateOrder(order.id, { status: 'paid' });
+  await fulfillOrder(updated);
+  res.json({ order: updated, message: 'Đã xác nhận và giao hàng' });
 }
 
 export async function listUsers(req, res) {
-  const users = await User.find().select('-password').sort({ createdAt: -1 }).limit(500);
+  const users = await fetchUsers();
   res.json(users);
 }
 
 export async function adjustBalance(req, res) {
+  const { id } = req.params;
+  if (!id || isNaN(Number(id))) {
+    return res.status(400).json({ message: 'ID người dùng không hợp lệ' });
+  }
   const { amount, field = 'balance' } = req.body; // field: balance | commissionBalance
-  const user = await User.findById(req.params.id);
-  if (!user) return res.status(404).json({ message: 'Khong tim thay user' });
-  user[field] = (user[field] || 0) + Number(amount);
-  await user.save();
-  res.json({ message: 'Da cap nhat', user: { id: user._id, balance: user.balance, commissionBalance: user.commissionBalance } });
+  const user = await findUserById(id);
+  if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+  const update = {};
+  update[field] = (user[field] || 0) + Number(amount);
+  const updatedUser = await updateUser(user.id, update);
+  res.json({ message: 'Đã cập nhật', user: { id: updatedUser.id, balance: updatedUser.balance, commissionBalance: updatedUser.commissionBalance } });
 }
 
 // Export don hang ra Excel
 export async function exportOrders(req, res) {
-  const orders = await Order.find().populate('user', 'email').sort({ createdAt: -1 });
+  const orders = await fetchOrderList();
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet('Orders');
   ws.columns = [
@@ -52,7 +74,7 @@ export async function exportOrders(req, res) {
   ];
   orders.forEach((o) => ws.addRow({
     code: o.code,
-    email: o.user?.email || '',
+    email: o.userEmail || '',
     productName: o.productName,
     quantity: o.quantity,
     totalAmount: o.totalAmount,
@@ -69,7 +91,7 @@ export async function exportOrders(req, res) {
 // Broadcast telegram toi tat ca user da link
 export async function broadcast(req, res) {
   const { message } = req.body;
-  const users = await User.find({ telegramId: { $ne: null } }).select('telegramId');
+  const users = await listUsersWithTelegram();
   let sent = 0;
   for (const u of users) {
     const ok = await sendTelegram(u.telegramId, message);
@@ -80,23 +102,24 @@ export async function broadcast(req, res) {
 
 // Quan ly rut tien
 export async function listWithdrawals(req, res) {
-  const items = await Withdrawal.find().populate('user', 'email').sort({ createdAt: -1 });
+  const items = await fetchWithdrawals();
   res.json(items);
 }
 
 export async function resolveWithdrawal(req, res) {
   const { action, note } = req.body; // approve | reject
-  const w = await Withdrawal.findById(req.params.id);
-  if (!w) return res.status(404).json({ message: 'Khong tim thay yeu cau' });
-  if (w.status !== 'pending') return res.status(400).json({ message: 'Yeu cau da xu ly' });
+  const w = await findWithdrawalById(req.params.id);
+  if (!w) return res.status(404).json({ message: 'Không tìm thấy yêu cầu' });
+  if (w.status !== 'pending') return res.status(400).json({ message: 'Yêu cầu đã xử lý' });
   if (action === 'approve') {
-    w.status = 'approved';
+    await updateWithdrawal(w.id, { status: 'approved', note: note || '' });
   } else {
-    // Hoan lai hoa hong neu tu choi
-    await User.findByIdAndUpdate(w.user, { $inc: { commissionBalance: w.amount } });
-    w.status = 'rejected';
+    const user = await findUserById(w.userId);
+    if (user) {
+      await updateUser(user.id, { commissionBalance: user.commissionBalance + w.amount });
+    }
+    await updateWithdrawal(w.id, { status: 'rejected', note: note || '' });
   }
-  w.note = note || '';
-  await w.save();
-  res.json({ message: 'Da xu ly', withdrawal: w });
+  const updated = await findWithdrawalById(w.id);
+  res.json({ message: 'Đã xử lý', withdrawal: updated });
 }

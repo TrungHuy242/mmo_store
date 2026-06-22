@@ -13,7 +13,7 @@ function md5(str) {
 export async function chargeCard({ telco, code, serial, amount, requestId }) {
   const { partnerId, partnerKey, apiUrl } = config.thesieure;
   if (!partnerId || !partnerKey) {
-    return { fallback: true, message: 'Chua cau hinh TheSieuRe, can admin xac nhan thu cong.' };
+    return { fallback: true, message: 'Chưa cấu hình TheSieuRe, cần admin xác nhận thủ công.' };
   }
   // Chu ky theo tai lieu TheSieuRe: md5(partner_key + code + serial)
   const sign = md5(partnerKey + code + serial);
@@ -33,7 +33,7 @@ export async function chargeCard({ telco, code, serial, amount, requestId }) {
     });
     return { fallback: false, data: res.data };
   } catch (err) {
-    console.error('[card] Loi gach the:', err.message);
+    console.error('[card] Lỗi gạch thẻ:', err.message);
     return { fallback: false, error: err.message };
   }
 }

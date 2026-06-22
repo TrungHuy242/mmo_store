@@ -1,85 +1,87 @@
-import Product from '../models/Product.js';
+import {
+  addStockItems,
+  createProduct as createProductRecord,
+  deleteProductById,
+  findProductById,
+  listProducts as fetchProducts,
+  updateProduct as updateProductRecord,
+} from '../repositories/productRepository.js';
 
 // Public: danh sach san pham (an du lieu stock nhay cam)
 export async function listProducts(req, res) {
-  const { category, search } = req.query;
-  const filter = { isActive: true };
-  if (category) filter.category = category;
-  if (search) filter.name = { $regex: search, $options: 'i' };
-
-  const products = await Product.find(filter).populate('category', 'name slug').sort({ createdAt: -1 });
-  res.json(products.map(publicView));
+  const { category, search, page, limit, sort } = req.query;
+  const products = await fetchProducts({
+    categoryId: category,
+    search,
+    page: page ? Number(page) : 1,
+    limit: limit ? Number(limit) : 12,
+    sort: sort || 'default',
+  });
+  res.json(products);
 }
 
 export async function getProduct(req, res) {
-  const product = await Product.findById(req.params.id).populate('category', 'name slug');
-  if (!product) return res.status(404).json({ message: 'Khong tim thay san pham' });
+  const product = await findProductById(req.params.id);
+  if (!product) return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
   res.json(publicView(product));
 }
 
 // Admin: tao san pham
 export async function createProduct(req, res) {
   const { name, description, price, image, category, deliveryType, flashSale, stock } = req.body;
-  const product = new Product({ name, description, price, image, category, deliveryType, flashSale });
-  if (Array.isArray(stock) && stock.length) product.addStock(stock);
-  await product.save();
-  res.status(201).json(adminView(product));
+  const product = await createProductRecord({ name, description, price, image, category, deliveryType, flashSale });
+  if (Array.isArray(stock) && stock.length) {
+    await addStockItems(product.id, stock);
+  }
+  const fresh = await findProductById(product.id);
+  res.status(201).json(adminView(fresh));
 }
 
 export async function updateProduct(req, res) {
-  const product = await Product.findById(req.params.id);
-  if (!product) return res.status(404).json({ message: 'Khong tim thay san pham' });
-  const { name, description, price, image, category, deliveryType, isActive, flashSale } = req.body;
-  Object.assign(product, {
-    ...(name !== undefined && { name }),
-    ...(description !== undefined && { description }),
-    ...(price !== undefined && { price }),
-    ...(image !== undefined && { image }),
-    ...(category !== undefined && { category }),
-    ...(deliveryType !== undefined && { deliveryType }),
-    ...(isActive !== undefined && { isActive }),
-    ...(flashSale !== undefined && { flashSale }),
-  });
-  await product.save();
+  const existing = await findProductById(req.params.id);
+  if (!existing) return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+  const product = await updateProductRecord(req.params.id, req.body);
   res.json(adminView(product));
 }
 
 // Admin: nap them stock
 export async function replenishStock(req, res) {
-  const product = await Product.findById(req.params.id);
-  if (!product) return res.status(404).json({ message: 'Khong tim thay san pham' });
-  const { items } = req.body; // mang chuoi payload
+  const product = await findProductById(req.params.id);
+  if (!product) return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+  const { items } = req.body; // mảng chuỗi payload
   if (!Array.isArray(items) || !items.length) {
-    return res.status(400).json({ message: 'Can mang items de nap kho' });
+    return res.status(400).json({ message: 'Cần mảng items để nạp kho' });
   }
-  product.addStock(items);
-  await product.save();
-  res.json({ message: `Da nap ${items.length} san pham`, stock: product.stock });
+  await addStockItems(product.id, items);
+  const updated = await findProductById(product.id);
+  res.json({ message: `Đã nạp ${items.length} sản phẩm`, stock: updated.stock });
 }
 
 export async function deleteProduct(req, res) {
-  await Product.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Da xoa san pham' });
+  await deleteProductById(req.params.id);
+  res.json({ message: 'Đã xóa sản phẩm' });
 }
 
 function publicView(p) {
-  const price = p.flashSale?.enabled && p.flashSale.endsAt > new Date()
-    ? p.flashSale.salePrice : p.price;
+  const now = new Date();
+  const flashSale = p.flashSale || { enabled: false, salePrice: 0, endsAt: null };
+  const effectivePrice = flashSale.enabled && flashSale.endsAt && new Date(flashSale.endsAt) > now
+    ? flashSale.salePrice : p.price;
   return {
-    id: p._id,
+    id: p.id,
     name: p.name,
     description: p.description,
     price: p.price,
-    effectivePrice: price,
+    effectivePrice,
     image: p.image,
     category: p.category,
     deliveryType: p.deliveryType,
     stock: p.stock,
-    flashSale: p.flashSale,
+    flashSale,
     createdAt: p.createdAt,
   };
 }
 
 function adminView(p) {
-  return { ...publicView(p), totalItems: p.stockItems.length };
+  return { ...publicView(p), totalItems: p.stock };
 }

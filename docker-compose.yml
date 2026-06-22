@@ -1,9 +1,13 @@
 services:
-  mongo:
-    image: mongo:7
+  postgres:
+    image: postgres:16
     restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: huy0610
+      POSTGRES_DB: mmostore
     volumes:
-      - mongo_data:/data/db
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - mmonet
 
@@ -13,9 +17,10 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - MONGO_URI=mongodb://mongo:27017/mmostore
+      - DB_TYPE=postgres
+      - DATABASE_URL=postgresql://postgres:huy0610@postgres:5432/mmostore
     depends_on:
-      - mongo
+      - postgres
     ports:
       - "5000:5000"
     networks:
@@ -36,7 +41,7 @@ services:
       - mmonet
 
 volumes:
-  mongo_data:
+  postgres_data:
 
 networks:
   mmonet:

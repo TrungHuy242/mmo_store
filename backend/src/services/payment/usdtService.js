@@ -23,7 +23,7 @@ export async function getRecentUsdtTransfers(limit = 30) {
       timestamp: tx.block_timestamp,
     }));
   } catch (err) {
-    console.error('[usdt] Loi goi TronGrid:', err.message);
+    console.error('[usdt] Lỗi gọi TronGrid:', err.message);
     return [];
   }
 }

@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { listOrders, markPaid, listUsers, adjustBalance, exportOrders, broadcast, listWithdrawals, resolveWithdrawal } from '../controllers/adminController.js';
+import { listOrders, markPaid, listUsers, adjustBalance, exportOrders, broadcast, listWithdrawals, resolveWithdrawal, getStats } from '../controllers/adminController.js';
 import { authRequired, adminRequired } from '../middleware/auth.js';
 
 const router = Router();
 router.use(authRequired, adminRequired);
+router.get('/stats', getStats);
 router.get('/orders', listOrders);
 router.post('/orders/:id/mark-paid', markPaid);
 router.get('/orders/export', exportOrders);

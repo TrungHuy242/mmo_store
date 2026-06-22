@@ -1,5 +1,7 @@
-import Product from '../models/Product.js';
-import User from '../models/User.js';
+import { decrypt } from '../utils/crypto.js';
+import { findProductById, getAvailableStockItems, markStockItemsSold } from '../repositories/productRepository.js';
+import { findUserById } from '../repositories/userRepository.js';
+import { updateOrder } from '../repositories/orderRepository.js';
 import { sendEmail, buildDeliveryEmail } from './emailService.js';
 import { sendTelegram, notifyAdmin } from './telegramService.js';
 import { payCommission } from './affiliateService.js';
@@ -9,38 +11,31 @@ import { payCommission } from './affiliateService.js';
 export async function fulfillOrder(order) {
   if (order.status === 'delivered') return order;
 
-  const product = await Product.findById(order.product);
+  const product = await findProductById(order.productId || order.product);
   if (!product) throw new Error('San pham khong ton tai');
 
-  const available = product.stockItems.filter((s) => !s.sold);
+  const available = await getAvailableStockItems(product.id, order.quantity);
   if (available.length < order.quantity) {
     throw new Error('Het hang truoc khi kip giao');
   }
 
-  const delivered = [];
-  for (let i = 0; i < order.quantity; i++) {
-    const item = available[i];
-    item.sold = true;
-    item.soldTo = order._id;
-    delivered.push(product.decryptItem(item));
-  }
-  await product.save();
+  const delivered = available.slice(0, order.quantity).map((item) => decrypt(item.payload_enc));
+  await markStockItemsSold(available.slice(0, order.quantity).map((item) => item.id), order.id);
 
-  order.deliveredItems = delivered;
-  order.deliveredAt = new Date();
-  order.status = 'delivered';
+  const updatedOrder = await updateOrder(order.id, {
+    status: 'delivered',
+    deliveredItems: delivered,
+    deliveredAt: new Date(),
+  });
 
-  // Chi hoa hong affiliate
-  await payCommission(order);
-  await order.save();
+  await payCommission(updatedOrder);
 
-  // Gui email + telegram cho nguoi mua
-  const buyer = await User.findById(order.user);
+  const buyer = await findUserById(order.userId || order.user);
   if (buyer?.email) {
     await sendEmail({
       to: buyer.email,
       subject: `[MMO Store] Don hang #${order.code} da giao`,
-      html: buildDeliveryEmail(order, delivered),
+      html: buildDeliveryEmail(updatedOrder, delivered),
     });
   }
   if (buyer?.telegramId) {
@@ -49,11 +44,10 @@ export async function fulfillOrder(order) {
     await sendTelegram(buyer.telegramId, text);
   }
 
-  // Canh bao ton kho thap cho admin
-  const remaining = product.stockItems.filter((s) => !s.sold).length;
+  const remaining = Math.max(product.stock - order.quantity, 0);
   if (remaining < 5) {
     await notifyAdmin(`⚠️ San pham <b>${product.name}</b> sap het hang (con ${remaining}).`);
   }
 
-  return order;
+  return updatedOrder;
 }

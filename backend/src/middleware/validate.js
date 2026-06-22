@@ -4,7 +4,7 @@ export function validate(schema) {
     const result = schema.safeParse(req.body);
     if (!result.success) {
       const errors = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
-      return res.status(400).json({ message: 'Du lieu khong hop le', errors });
+      return res.status(400).json({ message: 'Dữ liệu không hợp lệ', errors });
     }
     req.body = result.data;
     next();

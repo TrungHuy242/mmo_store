@@ -1,16 +1,18 @@
 # MMO Store
 
-He thong **website + Telegram bot** ban san pham MMO (digital products: tai khoan, proxy, tool, sms, the cao, khoa hoc, data...). Giao hang **tu dong** sau khi thanh toan, ho tro **affiliate 10%**, **admin panel** day du.
+Hệ thống **website + Telegram bot** bán sản phẩm MMO (sản phẩm số: tài khoản, proxy, tool, sms, thẻ cào, khóa học, data...). Giao hàng **tự động** sau khi thanh toán, hỗ trợ **affiliate 10%**, **admin panel** đầy đủ.
 
-## Cong nghe
+## Công nghệ
+
 - **Frontend:** React 18 + Vite + Tailwind CSS + Framer Motion + React Router DOM
-- **Backend:** Node.js + Express + MongoDB (Mongoose) + JWT
-- **Telegram bot:** node-telegram-bot-api (webhook, co polling cho dev)
-- **Thanh toan:** USDT TRC20 (TronGrid), VietQR/Bank (Casso webhook), The cao (TheSieuRe)
+- **Backend:** Node.js + Express + PostgreSQL + JWT
+- **Telegram bot:** node-telegram-bot-api (webhook, có polling cho dev)
+- **Thanh toán:** USDT TRC20 (TronGrid), VietQR/Bank (Casso webhook), Thẻ cào (TheSieuRe)
 - **Email:** Nodemailer SMTP
 - **Deploy:** Docker + docker-compose
 
-## Cau truc
+## Cấu trúc
+
 ```
 mmo-store/
   backend/         # Express API + Telegram bot + payment + cron
@@ -18,121 +20,128 @@ mmo-store/
   docker-compose.yml
 ```
 
-## Tinh nang chinh
-- Dang ky / dang nhap (JWT), lien ket Telegram
-- Danh sach san pham theo danh muc + tim kiem + flash sale countdown
-- Gio hang / checkout, **auto-delivery** qua email + Telegram
-- Affiliate 10% hoa hong, rut tien
-- Live inventory (kho tu giam, admin nap them)
-- Admin: CRUD san pham/danh muc, duyet don, sua so du, export Excel, broadcast Telegram
-- Tu dong: canh bao het hang (<5), bao cao doanh thu hang ngay qua Telegram
+## Tính năng chính
 
-## Bao mat
-- Secret nam trong `.env` (khong commit). Co `.env.example`, `.gitignore` chan `.env` that.
-- Webhook Casso/Telegram/the cao deu verify chu ky/secret.
-- Du lieu giao hang nhay cam (user/pass) duoc **ma hoa AES-256-GCM** trong DB.
-- Mat khau hash bcrypt, JWT co expiry, rate limit, helmet, CORS.
+- Đăng ký / đăng nhập (JWT), liên kết Telegram
+- Danh sách sản phẩm theo danh mục + tìm kiếm + flash sale countdown
+- Giỏ hàng / checkout, **auto-delivery** qua email + Telegram
+- Affiliate 10% hoa hồng, rút tiền
+- Live inventory (kho tự giảm, admin nạp thêm)
+- Admin: CRUD sản phẩm/danh mục, duyệt đơn, sửa số dư, export Excel, broadcast Telegram
+- Tự động: cảnh báo hết hàng (<5), báo cáo doanh thu hàng ngày qua Telegram
+
+## Bảo mật
+
+- Secret nằm trong `.env` (không commit). Có `.env.example`, `.gitignore` chặn `.env` thật.
+- Webhook Casso/Telegram/thẻ cào đều verify chữ ký/secret.
+- Dữ liệu giao hàng nhạy cảm (user/pass) được **mã hóa AES-256-GCM** trong DB.
+- Mật khẩu hash bcrypt, JWT có expiry, rate limit, helmet, CORS.
 
 ---
 
-## 1. Chay che do DEV (khong Docker)
+## 1. Chạy chế độ DEV (không Docker)
 
 ### Backend
+
 ```bash
 cd backend
-cp .env.example .env   # dien cac bien (xem ben duoi)
+cp .env.example .env   # điền các biến (xem bên dưới)
 npm install
-npm run seed           # tao admin + danh muc + san pham mau
-npm run dev            # chay tai http://localhost:5000
+npm run seed           # tạo admin + danh mục + sản phẩm mẫu
+npm run dev            # chạy tại http://localhost:5000
 ```
 
 ### Frontend
+
 ```bash
 cd frontend
 cp .env.example .env   # VITE_API_URL=http://localhost:5000/api
 npm install
-npm run dev            # chay tai http://localhost:5173
+npm run dev            # chạy tại http://localhost:5173
 ```
 
-Dang nhap admin mac dinh: email/password lay tu `ADMIN_EMAIL` / `ADMIN_PASSWORD` trong `backend/.env`.
+Đăng nhập admin mặc định: email/password lấy từ `ADMIN_EMAIL` / `ADMIN_PASSWORD` trong `backend/.env`.
 
 ---
 
-## 2. Chay bang Docker (khuyen nghi cho VPS)
+## 2. Chạy bằng Docker (khuyến nghị cho VPS)
 
 ```bash
-# 1. Tao file env cho backend
+# 1. Tạo file env cho backend
 cp backend/.env.example backend/.env
-# Sua backend/.env: dien JWT_SECRET, ENCRYPTION_KEY (32 ky tu), token telegram, key thanh toan, SMTP...
-# Luu y: trong Docker, MONGO_URI da duoc set san = mongodb://mongo:27017/mmostore
+# Sửa backend/.env: điền JWT_SECRET, ENCRYPTION_KEY (32 ký tự), token telegram, key thanh toán, SMTP...
+# Lưu ý: backend hiện tại sử dụng PostgreSQL. Đặt DB_TYPE=postgres và DATABASE_URL.
 
-# 2. (Tuy chon) tao .env o root de doi VITE_API_URL cho frontend khi deploy production
+# 2. (Tùy chọn) tạo .env ở root để đổi VITE_API_URL cho frontend khi deploy production
 cp .env.example .env
 
-# 3. Build & chay
+# 3. Build & chạy
 docker compose up -d --build
 
-# 4. Seed du lieu (admin + san pham mau)
+# 4. Seed dữ liệu (admin + sản phẩm mẫu)
 docker compose exec backend npm run seed
 ```
 
 - Frontend: http://localhost (port 80)
 - Backend API: http://localhost:5000/api
 
-Khi deploy production: tro domain frontend vao port 80, va dat `VITE_API_URL=https://api.yourdomain.com/api` (build lai frontend), `PUBLIC_BASE_URL=https://api.yourdomain.com` trong backend/.env.
+Khi deploy production: trỏ domain frontend vào port 80, và đặt `VITE_API_URL=https://api.yourdomain.com/api` (build lại frontend), `PUBLIC_BASE_URL=https://api.yourdomain.com` trong backend/.env.
 
 ---
 
-## 3. Cau hinh cac bien moi truong (backend/.env)
+## 3. Cấu hình các biến môi trường (backend/.env)
 
-| Bien | Mo ta |
-|------|-------|
-| `JWT_SECRET` | Chuoi ngau nhien dai de ky JWT |
-| `ENCRYPTION_KEY` | **Dung 32 ky tu** - khoa AES ma hoa du lieu giao hang |
-| `TELEGRAM_BOT_TOKEN` | Token bot tu @BotFather |
-| `TELEGRAM_ADMIN_CHAT_ID` | Chat ID admin nhan canh bao/bao cao |
+| Biến | Mô tả |
+| --- | --- |
+| `JWT_SECRET` | Chuỗi ngẫu nhiên dài để ký JWT |
+| `ENCRYPTION_KEY` | **Dùng 32 ký tự** - khóa AES mã hóa dữ liệu giao hàng nhạy cảm |
+| `TELEGRAM_BOT_TOKEN` | Token bot từ @BotFather |
+| `TELEGRAM_ADMIN_CHAT_ID` | Chat ID của admin nhận cảnh báo/báo cáo |
 | `TELEGRAM_USE_WEBHOOK` | `true` cho production (VPS HTTPS), `false` cho dev (polling) |
-| `TELEGRAM_WEBHOOK_SECRET` | Secret bao ve endpoint webhook telegram |
+| `TELEGRAM_WEBHOOK_SECRET` | Secret bảo vệ endpoint webhook telegram |
 | `TRONGRID_API_KEY` | API key TronGrid (USDT TRC20) |
-| `USDT_WALLET_ADDRESS` | Dia chi vi nhan USDT |
-| `BANK_ID` / `BANK_ACCOUNT_NO` / `BANK_ACCOUNT_NAME` | Thong tin tao VietQR |
-| `CASSO_WEBHOOK_SECRET` | Secure-Token Casso gui kem webhook (bat buoc) |
-| `THESIEURE_PARTNER_ID` / `THESIEURE_PARTNER_KEY` | Key gach the cao |
-| `SMTP_*` / `MAIL_FROM` | Cau hinh gui email |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Tai khoan admin tao boi seed |
+| `USDT_WALLET_ADDRESS` | Địa chỉ ví nhận USDT |
+| `BANK_ID` / `BANK_ACCOUNT_NO` / `BANK_ACCOUNT_NAME` | Thông tin tài khoản ngân hàng để sinh VietQR |
+| `CASSO_WEBHOOK_SECRET` | Secure-Token Casso gửi kèm webhook (bắt buộc để verify) |
+| `THESIEURE_PARTNER_ID` / `THESIEURE_PARTNER_KEY` | Key gạch thẻ cào |
+| `SMTP_*` / `MAIL_FROM` | Cấu hình gửi email |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Tài khoản admin tạo bởi seed |
 
 ---
 
-## 4. Cau hinh Telegram webhook
+## 4. Cấu hình Telegram webhook
 
-Khi `TELEGRAM_USE_WEBHOOK=true`, backend tu dong goi `setWebHook` toi:
+Khi `TELEGRAM_USE_WEBHOOK=true`, backend tự động gọi `setWebHook` tới:
+
 ```
 {PUBLIC_BASE_URL}/api/telegram/webhook/{TELEGRAM_WEBHOOK_SECRET}
 ```
-Dam bao `PUBLIC_BASE_URL` la domain HTTPS cong khai cua VPS. Bot cac lenh: `/start`, `/products`, `/order [id]`, `/status [ma]`, `/aff`, `/help`.
 
-Lien ket tai khoan: user can co `telegramId` trong DB (admin co the gan, hoac mo rong them luong lien ket qua bot).
+Đảm bảo `PUBLIC_BASE_URL` là domain HTTPS công khai của VPS. Bot các lệnh: `/start`, `/products`, `/order [id]`, `/status [mã]`, `/aff`, `/help`.
 
----
-
-## 5. Cau hinh webhook Casso (VietQR auto-check)
-
-1. Dang ky tai khoan **Casso**, lien ket ngan hang.
-2. Tao webhook tro toi: `https://api.yourdomain.com/api/payment/casso/webhook`
-3. Dat **Secure-Token** trung voi `CASSO_WEBHOOK_SECRET` trong `.env`.
-4. Khi khach chuyen khoan voi noi dung chua **ma don** (vd `MMOABC123`), Casso gui webhook, he thong tu doi chieu va giao hang.
+Liên kết tài khoản: user cần có `telegramId` trong DB (admin có thể gán, hoặc mở rộng thêm luồng liên kết qua bot).
 
 ---
 
-## 6. Luong thanh toan
+## 5. Cấu hình webhook Casso (VietQR auto-check)
 
-- **So du:** tru truc tiep, giao hang ngay.
-- **VietQR/Bank:** hien QR -> khach CK noi dung = ma don -> Casso webhook -> auto giao. (Hoac admin bam "Xac nhan".)
-- **USDT TRC20:** khach chuyen dung so tien -> bam "kiem tra" hoac he thong doi chieu TronGrid -> auto giao.
-- **The cao:** nhap ma+serial -> gach qua TheSieuRe (thieu key thi admin xac nhan thu cong).
+1. Đăng ký tài khoản **Casso**, liên kết ngân hàng.
+2. Tạo webhook trỏ tới: `https://api.yourdomain.com/api/payment/casso/webhook`
+3. Đặt **Secure-Token** trùng với `CASSO_WEBHOOK_SECRET` trong `.env`.
+4. Khi khách chuyển khoản với nội dung chứa **mã đơn** (vd `MMOABC123`), Casso gửi webhook, hệ thống tự đối chiếu và giao hàng.
 
 ---
 
-## Ghi chu
-- Day la nen tang day du, co the mo rong them (vi du: luong lien ket Telegram tu dong, them cong thanh toan, gio hang nhieu san pham).
-- **Nho doi tat ca secret mac dinh truoc khi len production.**
+## 6. Luồng thanh toán
+
+- **Số dư:** trừ trực tiếp, giao hàng ngay.
+- **VietQR/Bank:** hiện QR -> khách CK nội dung = mã đơn -> Casso webhook -> auto giao. (Hoặc admin bấm "Xác nhận".)
+- **USDT TRC20:** khách chuyển đúng số tiền -> bấm "kiểm tra" hoặc hệ thống đối chiếu TronGrid -> auto giao.
+- **Thẻ cào:** nhập mã+serial -> gạch qua TheSieuRe (thiếu key thì admin xác nhận thủ công).
+
+---
+
+## Ghi chú
+
+- Đây là nền tảng đầy đủ, có thể mở rộng thêm (ví dụ: luồng liên kết Telegram tự động, thêm cổng thanh toán, giỏ hàng nhiều sản phẩm).
+- **Nhớ đổi tất cả secret mặc định trước khi lên production.**

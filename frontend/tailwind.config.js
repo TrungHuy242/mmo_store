@@ -17,7 +17,7 @@ export default {
         'neon-magenta': '0 0 20px rgba(230,53,197,0.4)',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Be Vietnam Pro', 'system-ui', 'sans-serif'],
       },
     },
   },

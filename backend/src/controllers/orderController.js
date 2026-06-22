@@ -1,7 +1,7 @@
 import crypto from 'crypto';
-import Order from '../models/Order.js';
-import Product from '../models/Product.js';
-import User from '../models/User.js';
+import { createOrder as createOrderRecord, deleteOrderById, findOrderByCode, findOrderByIdAndUser, findOrdersByUser, updateOrder } from '../repositories/orderRepository.js';
+import { findProductById } from '../repositories/productRepository.js';
+import { findUserById, updateUser } from '../repositories/userRepository.js';
 import { fulfillOrder } from '../services/deliveryService.js';
 import { buildVietQrUrl } from '../services/payment/vietqrService.js';
 
@@ -12,20 +12,21 @@ function genOrderCode() {
 // Tao don hang moi
 export async function createOrder(req, res) {
   const { productId, quantity = 1, paymentMethod } = req.body;
-  const product = await Product.findById(productId);
-  if (!product || !product.isActive) return res.status(404).json({ message: 'San pham khong kha dung' });
-  if (product.stock < quantity) return res.status(400).json({ message: 'Khong du hang trong kho' });
+  const product = await findProductById(productId);
+  if (!product || !product.isActive) return res.status(404).json({ message: 'Sản phẩm không khả dụng' });
+  if (product.stock < quantity) return res.status(400).json({ message: 'Không đủ hàng trong kho' });
 
-  const unitPrice = product.flashSale?.enabled && product.flashSale.endsAt > new Date()
+  const now = new Date();
+  const unitPrice = product.flashSale?.enabled && product.flashSale.endsAt && new Date(product.flashSale.endsAt) > now
     ? product.flashSale.salePrice : product.price;
   const totalAmount = unitPrice * quantity;
 
   let code = genOrderCode();
-  while (await Order.findOne({ code })) code = genOrderCode();
+  while (await findOrderByCode(code)) code = genOrderCode();
 
-  const order = await Order.create({
-    user: req.user._id,
-    product: product._id,
+  const order = await createOrderRecord({
+    userId: req.user.id,
+    productId: product.id,
     productName: product.name,
     quantity,
     unitPrice,
@@ -33,24 +34,21 @@ export async function createOrder(req, res) {
     code,
     paymentMethod,
     status: 'pending',
+    paymentMeta: {},
   });
 
-  // Thanh toan bang so du -> giao ngay
   if (paymentMethod === 'balance') {
-    const user = await User.findById(req.user._id);
-    if (user.balance < totalAmount) {
-      await Order.findByIdAndDelete(order._id);
-      return res.status(400).json({ message: 'So du khong du' });
+    const user = await findUserById(req.user.id);
+    if (!user || user.balance < totalAmount) {
+      await deleteOrderById(order.id);
+      return res.status(400).json({ message: 'Số dư không đủ' });
     }
-    user.balance -= totalAmount;
-    await user.save();
-    order.status = 'paid';
-    await order.save();
-    await fulfillOrder(order);
-    return res.status(201).json({ order, paid: true });
+    await updateUser(user.id, { balance: user.balance - totalAmount });
+    const paidOrder = await updateOrder(order.id, { status: 'paid' });
+    await fulfillOrder(paidOrder);
+    return res.status(201).json({ order: paidOrder, paid: true });
   }
 
-  // Thanh toan thu cong / tu dong -> tra ve huong dan
   const payment = buildPaymentInstructions(order);
   res.status(201).json({ order, payment });
 }
@@ -66,7 +64,7 @@ function buildPaymentInstructions(order) {
   if (order.paymentMethod === 'usdt') {
     return {
       method: 'usdt',
-      note: `Chuyen dung so tien USDT tuong ung. Doi chieu tu dong qua TronGrid.`,
+      note: 'Chuyen dung so tien USDT tuong ung. Doi chieu tu dong qua TronGrid.',
       amount: order.totalAmount,
     };
   }
@@ -78,12 +76,12 @@ function buildPaymentInstructions(order) {
 
 // Lich su don cua user
 export async function myOrders(req, res) {
-  const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+  const orders = await findOrdersByUser(req.user.id);
   res.json(orders);
 }
 
 export async function getOrder(req, res) {
-  const order = await Order.findOne({ _id: req.params.id, user: req.user._id });
-  if (!order) return res.status(404).json({ message: 'Khong tim thay don hang' });
+  const order = await findOrderByIdAndUser(req.params.id, req.user.id);
+  if (!order) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
   res.json(order);
 }

@@ -20,6 +20,6 @@ async function start() {
 }
 
 start().catch((err) => {
-  console.error('[server] Loi khoi dong:', err);
+  console.error('[server] Lỗi khởi động:', err);
   process.exit(1);
 });

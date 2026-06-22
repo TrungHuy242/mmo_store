@@ -7,12 +7,14 @@ import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Checkout from './pages/Checkout.jsx';
 import Admin from './pages/Admin.jsx';
+import ProductDetail from './pages/ProductDetail.jsx';
 
 export default function App() {
   return (
     <Layout>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/checkout/:productId" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />

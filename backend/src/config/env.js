@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const required = ['MONGO_URI', 'JWT_SECRET', 'ENCRYPTION_KEY'];
+const required = ['JWT_SECRET', 'ENCRYPTION_KEY'];
 
 export const config = {
   env: process.env.NODE_ENV || 'development',
@@ -10,7 +10,9 @@ export const config = {
   publicBaseUrl: process.env.PUBLIC_BASE_URL || 'http://localhost:5000',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
 
+  dbType: process.env.DB_TYPE?.toLowerCase() || 'postgres',
   mongoUri: process.env.MONGO_URI,
+  databaseUrl: process.env.DATABASE_URL || '',
 
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
@@ -60,9 +62,17 @@ export const config = {
 export function validateConfig() {
   const missing = required.filter((k) => !process.env[k]);
   if (missing.length) {
-    console.warn(`[config] Thieu bien moi truong: ${missing.join(', ')}. Kiem tra file .env`);
+    console.warn(`[config] Thiếu biến môi trường: ${missing.join(', ')}. Kiểm tra file .env`);
   }
+
+  if (config.dbType === 'mongo' && !config.mongoUri) {
+    console.warn('[config] DB_TYPE=mongo yêu cầu MONGO_URI. Kiểm tra file backend/.env');
+  }
+  if (config.dbType === 'postgres' && !config.databaseUrl) {
+    console.warn('[config] DB_TYPE=postgres yêu cầu DATABASE_URL. Kiểm tra file backend/.env');
+  }
+
   if (config.encryptionKey && config.encryptionKey.length !== 32) {
-    console.warn('[config] ENCRYPTION_KEY nen dai dung 32 ky tu (256-bit) cho AES-256.');
+    console.warn('[config] ENCRYPTION_KEY nên dài đúng 32 ký tự (256-bit) cho AES-256.');
   }
 }

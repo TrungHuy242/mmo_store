@@ -1,0 +1,26 @@
+﻿{
+    "id":  10,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/12581568749404678872/screens/4415053427237636372\",\"title\":\"DESIGN.md\",\"screenshot\":{},\"htmlCode\":{\"name\":\"projects/12581568749404678872/files/4415053427237634749\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBKOARIhYXBwX2NvbXBhbmlvbl91c2VyX3VwbG9hZGVkX2ZpbGVzGmkKM3VzZXJfdXBsb2FkZWRfaHRtbF8wMDA2NTRkNWQ1YmQxYzBiMDU3NjJmMzQ1ZDA4Njc0YRILEgcQ5uq7sMAFGAGSASQKCnByb2plY3RfaWQSFkIUMTI1ODE1Njg3NDk0MDQ2Nzg4NzI\u0026filename=\u0026opi=96797242\",\"mimeType\":\"text/markdown\"},\"width\":\"780\",\"height\":\"1768\"}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "height":  "1768",
+                                             "htmlCode":  {
+                                                              "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBKOARIhYXBwX2NvbXBhbmlvbl91c2VyX3VwbG9hZGVkX2ZpbGVzGmkKM3VzZXJfdXBsb2FkZWRfaHRtbF8wMDA2NTRkNWQ1YmQxYzBiMDU3NjJmMzQ1ZDA4Njc0YRILEgcQ5uq7sMAFGAGSASQKCnByb2plY3RfaWQSFkIUMTI1ODE1Njg3NDk0MDQ2Nzg4NzI\u0026filename=\u0026opi=96797242",
+                                                              "mimeType":  "text/markdown",
+                                                              "name":  "projects/12581568749404678872/files/4415053427237634749"
+                                                          },
+                                             "name":  "projects/12581568749404678872/screens/4415053427237636372",
+                                             "screenshot":  {
+
+                                                            },
+                                             "title":  "DESIGN.md",
+                                             "width":  "780"
+                                         }
+               }
+}
