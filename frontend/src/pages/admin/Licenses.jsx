@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { licenseApi } from '../../api/license.api.js';
 import { productApi } from '../../api/product.api.js';
+import { SkeletonTable } from '../../components/ui';
 
 export default function Licenses() {
   const { t } = useTranslation();
@@ -335,12 +336,7 @@ export default function Licenses() {
                   </td>
                 </tr>
               ) : loading ? (
-                <tr>
-                  <td colSpan="7" className="px-4 py-12 text-center text-gray-500">
-                    <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-                    <p>Đang tải...</p>
-                  </td>
-                </tr>
+                <tr><td colSpan="7"><div className="py-12"><SkeletonTable rows={8} cols={7} /></div></td></tr>
               ) : filteredLicenses.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="px-4 py-12 text-center text-gray-500">

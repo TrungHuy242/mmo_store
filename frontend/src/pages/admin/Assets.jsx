@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Trash2, FileText, Archive, FileCode, File, Download, Search, Filter, RefreshCw, X, Check, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { assetApi, productApi } from '../../api';
+import { SkeletonTable } from '../../components/ui';
 
 // Format file size to human readable
 const formatFileSize = (bytes) => {
@@ -323,14 +324,7 @@ export default function Assets() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center">
-                    <div className="flex items-center justify-center gap-2 text-gray-300">
-                      <RefreshCw className="w-5 h-5 animate-spin" aria-hidden="true" />
-                      <span>Đang tải...</span>
-                    </div>
-                  </td>
-                </tr>
+                <tr><td colSpan={7}><div className="py-12"><SkeletonTable rows={8} cols={7} /></div></td></tr>
               ) : assets.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-12 text-center">

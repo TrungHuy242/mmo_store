@@ -8,6 +8,6 @@ export { default as Drawer } from './Drawer';
 export { default as Tabs } from './Tabs';
 export { default as Table } from './Table';
 export { default as Pagination } from './Pagination';
-export { Skeleton, SkeletonText, SkeletonCard, SkeletonTable, SkeletonProfile, SkeletonGrid } from './Skeleton';
+export { Skeleton, SkeletonText, SkeletonCard, SkeletonTable, SkeletonProfile, SkeletonGrid, SkeletonStatCard, SkeletonChartCard, SkeletonPage } from './Skeleton';
 export { default as CommandPalette, CommandGroup, CommandItem, CommandEmpty } from './CommandPalette';
 export { ToastProvider, useToast } from './Toast';

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { adminTicketApi } from '../../api/ticket.api.js';
 import { assetApi } from '../../api/asset.api.js';
+import { SkeletonTable } from '../../components/ui';
 
 // Image URL regex patterns
 const IMAGE_URL_PATTERN = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp)(?:\?[^\s]*)?)/gi;
@@ -351,9 +352,8 @@ export default function AdminSupport() {
           {/* Ticket List */}
           <div className="divide-y divide-white/5 max-h-[450px] overflow-y-auto">
             {loading ? (
-              <div className="p-8 text-center text-gray-500">
-                <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
-                <p>Đang tải...</p>
+              <div className="py-12 px-6">
+                <SkeletonTable rows={6} cols={5} />
               </div>
             ) : tickets.length === 0 ? (
               <div className="p-8 text-center text-gray-500">

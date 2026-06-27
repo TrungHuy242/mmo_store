@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { adminApi } from '../../services/adminApi';
 import { usePaginatedData } from '../../hooks/useAdminData';
 import Pagination from '../../components/ui/Pagination';
+import { SkeletonTable } from '../../components/ui';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -162,10 +163,7 @@ export default function AdminCustomers() {
         className="bg-[#111827] rounded-2xl border border-white/5 overflow-hidden"
       >
         {loading ? (
-          <div className="p-12 text-center">
-            <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto" />
-            <p className="text-gray-300 mt-4">{t('common.loading')}</p>
-          </div>
+          <SkeletonTable rows={8} cols={5} />
         ) : customers.length === 0 ? (
           <div className="p-12 text-center">
             <User className="w-12 h-12 mx-auto text-gray-500" aria-hidden="true" />

@@ -10,6 +10,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import toast from 'react-hot-toast';
+import { SkeletonStatCard, SkeletonChartCard, Skeleton } from '../../components/ui';
 import { adminApi } from '../../services/adminApi';
 import { useParallelData } from '../../hooks/useAdminData';
 
@@ -47,10 +48,6 @@ const EmptyChart = ({ message }) => (
   </div>
 );
 
-const SkeletonBlock = ({ height = 64 }) => (
-  <div className="animate-pulse bg-white/5 rounded" style={{ height }} />
-);
-
 const ChartCard = ({ title, loading, children, empty }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -60,7 +57,7 @@ const ChartCard = ({ title, loading, children, empty }) => (
     <h2 className="text-base font-semibold mb-4">{title}</h2>
     <div className="h-64">
       {loading ? (
-        <SkeletonBlock height="100%" />
+        <SkeletonChartCard />
       ) : empty ? (
         <EmptyChart message={empty} />
       ) : (
@@ -242,8 +239,8 @@ export default function AdminDashboard() {
             {recentOrdersRes.loading ? (
               [...Array(3)].map((_, i) => (
                 <div key={i} className="px-6 py-4 space-y-2">
-                  <SkeletonBlock height={14} />
-                  <SkeletonBlock height={10} />
+                  <Skeleton className="h-3.5 w-3/4" />
+                  <Skeleton className="h-2.5 w-1/2" />
                 </div>
               ))
             ) : recentOrders.length === 0 ? (
@@ -286,8 +283,8 @@ export default function AdminDashboard() {
             {topProductsRes.loading ? (
               [...Array(3)].map((_, i) => (
                 <div key={i} className="px-6 py-4 space-y-2">
-                  <SkeletonBlock height={14} />
-                  <SkeletonBlock height={10} />
+                  <Skeleton className="h-3.5 w-3/4" />
+                  <Skeleton className="h-2.5 w-1/2" />
                 </div>
               ))
             ) : topProducts.length === 0 ? (

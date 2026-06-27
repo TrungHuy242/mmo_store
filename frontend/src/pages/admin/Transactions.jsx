@@ -8,6 +8,7 @@ import {
   ChevronLeft, ChevronRight, AlertCircle
 } from 'lucide-react';
 import { adminApi } from '../../services/adminApi.js';
+import { SkeletonTable } from '../../components/ui';
 
 export default function AdminTransactions() {
   const { t } = useTranslation();
@@ -311,90 +312,88 @@ export default function AdminTransactions() {
       </div>
 
       {/* Transactions Table */}
-      <div className="bg-gradient-to-br from-[#111827] to-[#0f172a] rounded-2xl border border-white/5 overflow-hidden backdrop-blur-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/5">
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.transaction_id')}</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Loại</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.customer')}</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.amount')}</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Phí</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.status')}</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.date')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {loading ? (
-                <tr>
-                  <td colSpan="7" className="px-4 py-12 text-center text-gray-500">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
-                    <p>Đang tải...</p>
-                  </td>
-                </tr>
-              ) : transactions.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="px-4 py-12 text-center text-gray-500">
-                    <CreditCard className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p>Không có giao dịch nào</p>
-                  </td>
-                </tr>
-              ) : (
-                transactions.map((txn) => {
-                  const typeStyle = typeConfig[txn.type] || typeConfig.INCOME;
-                  const statusStyle = statusConfig[txn.status] || statusConfig.PENDING;
-                  const isNegative = txn.type === 'WITHDRAWAL' || txn.type === 'REFUND' || txn.type === 'FEE';
-                  
-                  return (
-                    <tr key={txn.id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-4 py-4">
-                        <span className="font-mono text-sm text-blue-400">{txn.id?.slice(0, 12)}...</span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className={`px-2 py-1 text-xs rounded-full border ${typeStyle.color}`}>
-                          {typeStyle.label}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="text-sm">
-                          <p className="text-white">{txn.user?.username || txn.user?.email || 'Khách hàng'}</p>
-                          {txn.user?.email && (
-                            <p className="text-xs text-gray-500">{txn.user.email}</p>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className={`font-medium ${isNegative ? 'text-red-400' : 'text-green-400'}`}>
-                          {isNegative ? '-' : '+'}{Number(txn.amount || 0).toLocaleString('vi-VN')}₫
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className="text-sm text-gray-400">
-                          {txn.fee > 0 ? `${Number(txn.fee).toLocaleString('vi-VN')}₫` : '-'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className={`px-2 py-1 text-xs rounded-full border ${statusStyle.color}`}>
-                          {statusStyle.label}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className="text-xs text-gray-500">
-                          {txn.createdAt ? new Date(txn.createdAt).toLocaleString('vi-VN') : '-'}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+      {loading ? (
+        <div className="bg-gradient-to-br from-[#111827] to-[#0f172a] rounded-2xl border border-white/5 p-6 backdrop-blur-sm">
+          <SkeletonTable rows={8} cols={7} />
         </div>
-        
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="px-4 py-3 border-t border-white/5 flex items-center justify-between">
+      ) : (
+        <div className="bg-gradient-to-br from-[#111827] to-[#0f172a] rounded-2xl border border-white/5 overflow-hidden backdrop-blur-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/5">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.transaction_id')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Loại</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.customer')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.amount')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Phí</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.status')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.date')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {transactions.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="px-4 py-12 text-center text-gray-500">
+                      <CreditCard className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p>Không có giao dịch nào</p>
+                    </td>
+                  </tr>
+                ) : (
+                  transactions.map((txn) => {
+                    const typeStyle = typeConfig[txn.type] || typeConfig.INCOME;
+                    const statusStyle = statusConfig[txn.status] || statusConfig.PENDING;
+                    const isNegative = txn.type === 'WITHDRAWAL' || txn.type === 'REFUND' || txn.type === 'FEE';
+
+                    return (
+                      <tr key={txn.id} className="hover:bg-white/5 transition-colors">
+                        <td className="px-4 py-4">
+                          <span className="font-mono text-sm text-blue-400">{txn.id?.slice(0, 12)}...</span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`px-2 py-1 text-xs rounded-full border ${typeStyle.color}`}>
+                            {typeStyle.label}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="text-sm">
+                            <p className="text-white">{txn.user?.username || txn.user?.email || 'Khách hàng'}</p>
+                            {txn.user?.email && (
+                              <p className="text-xs text-gray-500">{txn.user.email}</p>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`font-medium ${isNegative ? 'text-red-400' : 'text-green-400'}`}>
+                            {isNegative ? '-' : '+'}{Number(txn.amount || 0).toLocaleString('vi-VN')}₫
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="text-sm text-gray-400">
+                            {txn.fee > 0 ? `${Number(txn.fee).toLocaleString('vi-VN')}₫` : '-'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`px-2 py-1 text-xs rounded-full border ${statusStyle.color}`}>
+                            {statusStyle.label}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="text-xs text-gray-500">
+                            {txn.createdAt ? new Date(txn.createdAt).toLocaleString('vi-VN') : '-'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="px-4 py-3 border-t border-white/5 flex items-center justify-between">
             <p className="text-sm text-gray-400">
               Hiển thị {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, total)} của {total} giao dịch
             </p>
@@ -434,7 +433,8 @@ export default function AdminTransactions() {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

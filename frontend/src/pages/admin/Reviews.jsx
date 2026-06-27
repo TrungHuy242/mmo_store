@@ -7,6 +7,7 @@ import {
   ChevronDown, Filter, ChevronLeft, ChevronRight, Eye
 } from 'lucide-react';
 import { reviewApi } from '../../api/review.api.js';
+import { SkeletonTable } from '../../components/ui';
 import { productApi } from '../../api/index.js';
 
 // Star Rating Component
@@ -387,143 +388,119 @@ export default function Reviews() {
       </div>
 
       {/* Reviews Table */}
-      <div className="bg-gradient-to-br from-[#111827] to-[#0f172a] rounded-2xl border border-white/5 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/5">
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Khách hàng</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Sản phẩm</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Số sao</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nội dung</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Phản hồi</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Ngày</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {loading ? (
-                <tr>
-                  <td colSpan="8" className="px-4 py-12 text-center text-gray-300">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" aria-hidden="true" />
-                    <p>Đang tải...</p>
-                  </td>
+      {loading ? (
+        <div className="bg-gradient-to-br from-[#111827] to-[#0f172a] rounded-2xl border border-white/5 p-6">
+          <SkeletonTable rows={8} cols={8} />
+        </div>
+      ) : (
+        <div className="bg-gradient-to-br from-[#111827] to-[#0f172a] rounded-2xl border border-white/5 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/5">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Khách hàng</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Sản phẩm</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Số sao</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nội dung</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Phản hồi</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Ngày</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Thao tác</th>
                 </tr>
-              ) : reviews.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="px-4 py-12 text-center text-gray-300">
-                    <Star className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true" />
-                    <p>Không có đánh giá nào</p>
-                  </td>
-                </tr>
-              ) : (
-                reviews.map((review) => (
-                  <tr key={review.id} className="hover:bg-white/5 transition-colors">
-                    <td className="px-4 py-4">
-                      <span className="text-sm text-blue-400 font-mono">#{review.id?.slice(0, 8)}</span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        {review.user?.avatar ? (
-                          <img
-                            src={review.user.avatar}
-                            alt={review.user.name}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                            <span className="text-primary text-xs font-semibold">
-                              {review.user?.name?.[0] || review.user?.email?.[0] || 'U'}
-                            </span>
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-sm font-medium text-white">{review.user?.name || 'Khách hàng'}</p>
-                          <p className="text-xs text-gray-300">{review.user?.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <p className="text-sm text-white line-clamp-1 max-w-[150px]">
-                        {review.product?.name || review.productName || `Sản phẩm #${review.productId?.slice(0, 8)}`}
-                      </p>
-                    </td>
-                    <td className="px-4 py-4">
-                      <StarRating rating={review.rating} />
-                    </td>
-                    <td className="px-4 py-4">
-                      <p className="text-sm text-gray-300 line-clamp-2 max-w-[250px]">
-                        {review.content}
-                      </p>
-                    </td>
-                    <td className="px-4 py-4">
-                      {review.adminReply ? (
-                        <div className="max-w-[200px]">
-                          <p className="text-xs text-blue-400 font-medium">Admin:</p>
-                          <p className="text-xs text-gray-300 line-clamp-2">{review.adminReply}</p>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-400 italic">Chưa phản hồi</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4">
-                      <span className="text-sm text-gray-300">
-                        {new Date(review.createdAt).toLocaleDateString('vi-VN')}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => setReplyReview(review)}
-                          className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
-                          title="Phản hồi"
-                          aria-label={`Phản hồi đánh giá của ${review.user?.name || review.user?.email || 'khách hàng'}`}
-                        >
-                          <MessageSquare className="w-4 h-4" aria-hidden="true" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(review.id)}
-                          className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                          title="Xóa"
-                          aria-label={`Xóa đánh giá của ${review.user?.name || review.user?.email || 'khách hàng'}`}
-                        >
-                          <Trash2 className="w-4 h-4" aria-hidden="true" />
-                        </button>
-                      </div>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {reviews.length === 0 ? (
+                  <tr>
+                    <td colSpan="8" className="px-4 py-12 text-center text-gray-300">
+                      <Star className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true" />
+                      <p>Không có đánh giá nào</p>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="p-3 border-t border-white/5 flex items-center justify-between">
-            <p className="text-xs text-gray-500">
-              Trang {currentPage}/{totalPages} • {total} đánh giá
-            </p>
-            <div className="flex gap-1">
-              <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="p-1.5 rounded-lg hover:bg-white/10 disabled:opacity-50"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="p-1.5 rounded-lg hover:bg-white/10 disabled:opacity-50"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+                ) : (
+                  reviews.map((review) => (
+                    <tr key={review.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-4 py-4">
+                        <span className="text-sm text-blue-400 font-mono">#{review.id?.slice(0, 8)}</span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          {review.user?.avatar ? (
+                            <img src={review.user.avatar} alt={review.user.name} className="w-8 h-8 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                              {review.user?.name?.charAt(0) || 'U'}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-medium text-white">{review.user?.name || review.user?.email}</p>
+                            {review.user?.email && <p className="text-xs text-gray-500">{review.user.email}</p>}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          {review.product?.thumbnail && (
+                            <img src={review.product.thumbnail} alt={review.product?.name} className="w-8 h-8 rounded object-cover" />
+                          )}
+                          <span className="text-sm">{review.product?.name || `Sản phẩm #${review.productId?.slice(0, 8)}`}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-1">
+                          {[1,2,3,4,5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-4 h-4 ${star <= review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`}
+                              aria-hidden="true"
+                            />
+                          ))}
+                          <span className="ml-1 text-sm text-gray-400">{review.rating}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 max-w-xs">
+                        <p className="text-sm text-gray-300 line-clamp-2">{review.content}</p>
+                      </td>
+                      <td className="px-4 py-4">
+                        {review.adminReply ? (
+                          <div className="text-sm">
+                            <p className="text-gray-300 line-clamp-2">{review.adminReply}</p>
+                            <p className="text-xs text-gray-500 mt-1">{review.repliedAt ? new Date(review.repliedAt).toLocaleDateString('vi-VN') : ''}</p>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-500">Chưa phản hồi</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-500">
+                        {review.createdAt ? new Date(review.createdAt).toLocaleDateString('vi-VN') : '-'}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2 justify-end">
+                          {!review.adminReply && (
+                            <button
+                              onClick={() => setSelectedReview(review)}
+                              className="p-2 rounded-lg hover:bg-white/10 text-blue-400 transition-colors"
+                              title="Phản hồi"
+                            >
+                              <MessageSquare className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteReview(review.id)}
+                            className="p-2 rounded-lg hover:bg-white/10 text-red-400 transition-colors"
+                            title="Xóa"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Reply Modal */}
       <AnimatePresence>

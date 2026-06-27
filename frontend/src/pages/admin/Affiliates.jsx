@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { UserPlus, DollarSign, TrendingUp, Users, Copy, ExternalLink, CheckCircle, RefreshCw, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { adminApi } from '../../services/adminApi';
+import { SkeletonTable } from '../../components/ui';
 
 export default function AdminAffiliates() {
   const { t } = useTranslation();
@@ -163,7 +164,7 @@ export default function AdminAffiliates() {
               </tr></thead>
               <tbody className="divide-y divide-white/5">
                 {loading ? (
-                  <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-300">Đang tải...</td></tr>
+                  <tr><td colSpan={5}><div className="py-8"><SkeletonTable rows={6} cols={5} /></div></td></tr>
                 ) : affiliates.length === 0 ? (
                   <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-300">Chưa có cộng tác viên nào</td></tr>
                 ) : affiliates.map((aff) => (

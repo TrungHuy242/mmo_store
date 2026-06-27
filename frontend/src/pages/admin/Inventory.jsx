@@ -15,6 +15,7 @@ import { adminApi } from '../../services/adminApi';
 import { useAdminData } from '../../hooks/useAdminData';
 import Modal, { ConfirmModal } from '../../components/ui/Modal';
 import Pagination from '../../components/ui/Pagination';
+import { SkeletonTable } from '../../components/ui';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -50,18 +51,6 @@ function StatusBadge({ status }) {
   const cls = STATUS_BADGES[status] || 'bg-gray-500/10 text-gray-400 border border-gray-500/20';
   const label = STATUS_LABELS[status] || status;
   return <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${cls}`}>{label}</span>;
-}
-
-function SkeletonRow() {
-  return (
-    <tr>
-      {[...Array(6)].map((_, i) => (
-        <td key={i} className="px-4 py-3">
-          <div className="h-4 bg-white/5 rounded animate-pulse" style={{ width: `${60 + ((i * 13) % 40)}%` }} />
-        </td>
-      ))}
-    </tr>
-  );
 }
 
 function MaskedValue({ value }) {
@@ -526,7 +515,17 @@ export default function AdminInventory() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {loadingInventory ? (
-                [...Array(5)].map((_, i) => <SkeletonRow key={i} />)
+                <>
+                  {[...Array(5)].map((_, i) => (
+                    <tr key={i} className="border-b border-white/5">
+                      {[...Array(6)].map((_, j) => (
+                        <td key={j} className="px-4 py-3">
+                          <div className="h-4 bg-white/5 rounded animate-pulse" style={{ width: `${60 + ((j * 13) % 40)}%` }} />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </>
               ) : !selectedProductId ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-12 text-center text-gray-400">

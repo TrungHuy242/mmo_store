@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { couponApi } from '../../api/coupon.api.js';
 import { productApi } from '../../api/index.js';
+import { SkeletonTable } from '../../components/ui';
 
 export default function Coupons() {
   const { t } = useTranslation();
@@ -270,12 +271,7 @@ export default function Coupons() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? (
-                <tr>
-                  <td colSpan="8" className="px-4 py-12 text-center text-gray-500">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
-                    <p>Đang tải...</p>
-                  </td>
-                </tr>
+                <tr><td colSpan="8"><div className="py-12"><SkeletonTable rows={8} cols={8} /></div></td></tr>
               ) : filteredCoupons.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="px-4 py-12 text-center text-gray-500">
