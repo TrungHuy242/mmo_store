@@ -1,7 +1,4 @@
 import express from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import rateLimit from 'express-rate-limit';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import mongoSanitize from 'express-mongo-sanitize';
@@ -10,6 +7,13 @@ import xss from 'xss-clean';
 import config from './config/index.js';
 import errorHandler from './middlewares/error.middleware.js';
 import notFound from './middlewares/notfound.middleware.js';
+import {
+  helmetMiddleware,
+  corsMiddleware,
+  hppMiddleware,
+  apiLimiter,
+  authLimiter,
+} from './middlewares/security.middleware.js';
 import { maintenanceMiddleware } from './modules/settings/maintenance.middleware.js';
 
 // Import routes
@@ -40,59 +44,65 @@ import webhookRoutes from './webhooks/index.js';
 
 const app = express();
 
-// Security middleware
-app.use(helmet());
+// ─── Behind a proxy/load balancer (nginx, heroku, cloudflare, ...) ───────────
+// Trust the first proxy hop so req.ip / express-rate-limit see the real
+// client IP rather than the proxy IP. Required for accurate rate limiting.
+app.set('trust proxy', 1);
+
+// ─── Security middleware (helmet -> hpp -> cors -> sanitizers) ─────────────
+//
+// Order matters:
+//   1. helmet      - set secure response headers first
+//   2. hpp         - normalise query/body before any later parser reads it
+//   3. cors        - handle preflight OPTIONS for browser clients
+//   4. mongoSanitize / xss-clean - scrub input before handlers run
+//
+app.use(helmetMiddleware);
+app.use(hppMiddleware);
+app.use(corsMiddleware);
 app.use(xss());
 app.use(mongoSanitize());
 
-// Compression
+// Compression + cookies + body parsing
 app.use(compression());
-
-// Cookie parser
 app.use(cookieParser());
-
-// CORS
-app.use(cors({
-  origin: config.corsOrigins,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-// Body parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: config.rateLimit.windowMs,
-  max: config.rateLimit.maxRequests,
-  message: { error: 'Too many requests, please try again later.' },
-  standardHeaders: true,
-  legacyHeaders: false,
-  skip: (req) => config.nodeEnv !== 'production', // Bỏ qua hoàn toàn rate limit khi đang dev
-});
-app.use('/api/', limiter);
+// ─── Rate limiting ──────────────────────────────────────────────────────────
+//
+// General API: 100 requests / 15 minutes per IP.
+// Sensitive auth endpoints: 10 requests / 15 minutes per IP.
+//
+// Rate limiters are mounted BEFORE the routes so they run first.
+// The webhooks mount point stays outside /api and is not rate limited
+// because external services (Casso, Thesieure, ...) POST from rotating
+// IPs that we cannot reliably whitelist here.
+//
+app.use('/api/', apiLimiter);
 
-// Stricter rate limit for auth endpoints
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
-  message: { error: 'Too many login attempts, please try again later.' },
-  skip: (req) => config.nodeEnv !== 'production', // Bỏ qua rate limit login khi đang dev
-});
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/admin/login', authLimiter);
+// 10 req / 15 min for every endpoint that can be abused to spam, brute
+// force or create accounts.
+const authSensitivePaths = [
+  '/api/auth/login',
+  '/api/auth/admin/login',
+  '/api/auth/register',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+  '/api/auth/verify-otp',
+  '/api/auth/resend-otp',
+];
+authSensitivePaths.forEach((p) => app.use(p, authLimiter));
 
-// Health check
+// ─── Health check (no rate limit, no auth) ──────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Apply maintenance middleware (before routes, but after health check)
+// Apply maintenance middleware (after health check so /health still works)
 app.use(maintenanceMiddleware);
 
-// API Routes
+// ─── API Routes ─────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -115,10 +125,20 @@ app.use('/api/admin/broadcast', broadcastRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/settings', settingsRoutes);
 
-// Webhooks
+// Webhooks (outside /api, intentionally not rate limited)
 app.use('/webhooks', webhookRoutes);
 
-// Error handling
+// ─── Error handling ─────────────────────────────────────────────────────────
+// Translate CORS rejections (thrown from the cors callback) into a
+// proper 403 response instead of letting them fall through to the
+// generic error handler.
+app.use((err, req, res, next) => {
+  if (err && err.message && err.message.startsWith('CORS:')) {
+    return res.status(403).json({ success: false, error: err.message });
+  }
+  return next(err);
+});
+
 app.use(notFound);
 app.use(errorHandler);
 
