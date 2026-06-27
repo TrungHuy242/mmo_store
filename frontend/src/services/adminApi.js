@@ -1,220 +1,128 @@
 /**
  * Admin API Service
  * Tập trung toàn bộ API calls cho Admin Dashboard
+ *
+ * Sử dụng shared axios client (api/client.js) để tận dụng:
+ *   - Bearer token tự động gắn vào mỗi request
+ *   - Silent refresh token khi gặp 401
+ *   - Response shape đồng nhất: mỗi call trả về axios response,
+ *     data nằm ở `res.data.data`, pagination ở `res.data.pagination`.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-};
-
-/**
- * Helper để tạo query string từ object
- */
-const toQueryString = (params = {}) => {
-  const filtered = Object.fromEntries(
-    Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
-  );
-  return new URLSearchParams(filtered).toString();
-};
-
-/**
- * Base fetch wrapper với error handling
- */
-const apiFetch = async (path, options = {}) => {
-  const qs = options.params ? `?${toQueryString(options.params)}` : '';
-  const url = `${API_BASE_URL}${path}${qs}`;
-
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      ...getAuthHeaders(),
-      ...options.headers,
-    },
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    const err = new Error(data.message || `HTTP ${res.status}`);
-    err.response = { status: res.status, data };
-    throw err;
-  }
-
-  return data;
-};
+import api from '../api/client.js';
 
 // ─── Products ──────────────────────────────────────────────────────────────
 
-export const getProducts = (params) =>
-  apiFetch('/products', { params });
-
-export const getProduct = (id) =>
-  apiFetch(`/products/${id}`);
-
-export const createProduct = (body) =>
-  apiFetch('/products', { method: 'POST', body: JSON.stringify(body) });
-
-export const updateProduct = (id, body) =>
-  apiFetch(`/products/${id}`, { method: 'PUT', body: JSON.stringify(body) });
-
-export const deleteProduct = (id) =>
-  apiFetch(`/products/${id}`, { method: 'DELETE' });
+export const getProducts = (params) => api.get('/products', { params });
+export const getProduct = (id) => api.get(`/products/${id}`);
+export const createProduct = (body) => api.post('/products', body);
+export const updateProduct = (id, body) => api.put(`/products/${id}`, body);
+export const deleteProduct = (id) => api.delete(`/products/${id}`);
 
 // ─── Categories ────────────────────────────────────────────────────────────
 
-export const getCategories = () =>
-  apiFetch('/categories');
-
-export const createCategory = (body) =>
-  apiFetch('/categories', { method: 'POST', body: JSON.stringify(body) });
-
-export const updateCategory = (id, body) =>
-  apiFetch(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(body) });
-
-export const deleteCategory = (id) =>
-  apiFetch(`/categories/${id}`, { method: 'DELETE' });
+export const getCategories = () => api.get('/categories');
+export const createCategory = (body) => api.post('/categories', body);
+export const updateCategory = (id, body) => api.put(`/categories/${id}`, body);
+export const deleteCategory = (id) => api.delete(`/categories/${id}`);
 
 // ─── Orders ────────────────────────────────────────────────────────────────
 
-export const getOrders = (params) =>
-  apiFetch('/orders', { params });
-
-export const getOrder = (id) =>
-  apiFetch(`/orders/${id}`);
-
-export const cancelOrder = (id) =>
-  apiFetch(`/orders/${id}/cancel`, { method: 'PUT' });
-
-export const completeOrder = (id) =>
-  apiFetch(`/orders/${id}/complete`, { method: 'POST' });
+export const getOrders = (params) => api.get('/orders', { params });
+export const getOrder = (id) => api.get(`/orders/${id}`);
+export const cancelOrder = (id) => api.put(`/orders/${id}/cancel`);
+export const completeOrder = (id) => api.post(`/orders/${id}/complete`);
 
 // ─── Inventory ─────────────────────────────────────────────────────────────
 
 export const getInventoryByProduct = (productId, params) =>
-  apiFetch(`/inventory/product/${productId}`, { params });
+  api.get(`/inventory/product/${productId}`, { params });
 
 export const getInventoryStats = (productId) =>
-  apiFetch('/inventory/statistics', { params: productId ? { productId } : {} });
+  api.get('/inventory/statistics', { params: productId ? { productId } : {} });
 
 export const addBulkInventory = (productId, items) =>
-  apiFetch('/inventory/bulk', {
-    method: 'POST',
-    body: JSON.stringify({ productId, items }),
-  });
+  api.post('/inventory/bulk', { productId, items });
 
-export const deleteInventoryItem = (id) =>
-  apiFetch(`/inventory/${id}`, { method: 'DELETE' });
+export const deleteInventoryItem = (id) => api.delete(`/inventory/${id}`);
 
 // ─── Customers ─────────────────────────────────────────────────────────────
 
-export const getCustomers = (params) =>
-  apiFetch('/customers', { params });
-
-export const getCustomer = (id) =>
-  apiFetch(`/customers/${id}`);
-
+export const getCustomers = (params) => api.get('/customers', { params });
+export const getCustomer = (id) => api.get(`/customers/${id}`);
 export const updateCustomerStatus = (id, status) =>
-  apiFetch(`/customers/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
-
+  api.patch(`/customers/${id}/status`, { status });
 export const adjustCustomerBalance = (id, body) =>
-  apiFetch(`/customers/${id}/balance`, { method: 'PUT', body: JSON.stringify(body) });
+  api.put(`/customers/${id}/balance`, body);
 
 // ─── Dashboard ─────────────────────────────────────────────────────────────
 
-export const getDashboardStats = () =>
-  apiFetch('/dashboard/statistics');
-
+export const getDashboardStats = () => api.get('/dashboard/statistics');
 export const getRecentOrders = (limit = 5) =>
-  apiFetch('/dashboard/recent-orders', { params: { limit } });
-
+  api.get('/dashboard/recent-orders', { params: { limit } });
 export const getTopProducts = (limit = 5) =>
-  apiFetch('/dashboard/top-products', { params: { limit } });
+  api.get('/dashboard/top-products', { params: { limit } });
+export const getRevenueSeries = (period = 'month') =>
+  api.get('/dashboard/revenue', { params: { period } });
 
 // ─── Affiliates ────────────────────────────────────────────────────────────
 
-export const getAffiliates = (params) =>
-  apiFetch('/affiliates', { params });
-
-export const approveAffiliate = (userId) =>
-  apiFetch(`/affiliates/${userId}/approve`, { method: 'PUT' });
-
+export const getAffiliates = (params) => api.get('/affiliates', { params });
+export const approveAffiliate = (userId) => api.put(`/affiliates/${userId}/approve`);
 export const getWithdrawals = (status = 'pending') =>
-  apiFetch('/affiliates/withdrawals', { params: { status } });
-
+  api.get('/affiliates/withdrawals', { params: { status } });
 export const approveWithdrawal = (id, transactionId) =>
-  apiFetch(`/affiliates/withdrawals/${id}/approve`, {
-    method: 'PUT',
-    body: JSON.stringify({ transactionId }),
-  });
-
+  api.put(`/affiliates/withdrawals/${id}/approve`, { transactionId });
 export const rejectWithdrawal = (id, reason) =>
-  apiFetch(`/affiliates/withdrawals/${id}/reject`, {
-    method: 'PUT',
-    body: JSON.stringify({ reason }),
-  });
+  api.put(`/affiliates/withdrawals/${id}/reject`, { reason });
 
 // ─── Analytics ─────────────────────────────────────────────────────────────
 
 export const getRevenue = (period = '30d') =>
-  apiFetch('/analytics/revenue', { params: { period } });
-
+  api.get('/analytics/revenue', { params: { period } });
 export const getOrdersByDay = (period = 30) =>
-  apiFetch('/analytics/orders-by-day', { params: { period } });
+  api.get('/analytics/orders-by-day', { params: { period } });
 
 // ─── Payments / Transactions ───────────────────────────────────────────────
 
 export const getTransactions = (params = {}) =>
-  apiFetch('/payments/transactions', { params });
+  api.get('/payments/transactions', { params });
 
-// ─── Namespace export ──────────────────────────────────────────────────────
+// ─── Namespace export (back-compat) ────────────────────────────────────────
 
 export const adminApi = {
-  // Products
   getProducts,
   getProduct,
   createProduct,
   updateProduct,
   deleteProduct,
-  // Categories
   getCategories,
   createCategory,
   updateCategory,
   deleteCategory,
-  // Orders
   getOrders,
   getOrder,
   cancelOrder,
   completeOrder,
-  // Inventory
   getInventoryByProduct,
   getInventoryStats,
   addBulkInventory,
   deleteInventoryItem,
-  // Customers
   getCustomers,
   getCustomer,
   updateCustomerStatus,
   adjustCustomerBalance,
-  // Dashboard
   getDashboardStats,
   getRecentOrders,
   getTopProducts,
-  // Affiliates
+  getRevenueSeries,
   getAffiliates,
   approveAffiliate,
   getWithdrawals,
   approveWithdrawal,
   rejectWithdrawal,
-  // Analytics
   getRevenue,
   getOrdersByDay,
-  // Payments
   getTransactions,
 };
 

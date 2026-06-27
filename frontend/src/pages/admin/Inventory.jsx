@@ -1,26 +1,23 @@
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import {
-  Package, AlertTriangle, TrendingUp, TrendingDown, RefreshCw,
-  Plus, Download, Search, Filter, ChevronLeft, ChevronRight,
-  Boxes, Clock, CheckCircle, XCircle, Trash2, Eye, EyeOff,
-  Upload, X, Copy, Check
+  Package, AlertTriangle, TrendingUp, Boxes, CheckCircle,
+  RefreshCw, Search, ChevronLeft, ChevronRight,
+  Trash2, Eye, EyeOff, Upload, X, Copy, Check, User,
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer
+  Tooltip, ResponsiveContainer,
 } from 'recharts';
-import {
-  getProducts,
-  getInventoryByProduct,
-  getInventoryStats,
-  addBulkInventory,
-  deleteInventoryItem,
-} from '../../services/adminApi';
 import toast from 'react-hot-toast';
+import { adminApi } from '../../services/adminApi';
+import { useAdminData } from '../../hooks/useAdminData';
+import Modal, { ConfirmModal } from '../../components/ui/Modal';
+import Pagination from '../../components/ui/Pagination';
 
-// Inventory item type labels
+const ITEMS_PER_PAGE = 20;
+
 const ITEM_TYPES = [
   { value: 'LICENSE_KEY', label: 'License Key', icon: '🔑' },
   { value: 'ACCOUNT', label: 'Tài khoản (email:pass)', icon: '👤' },
@@ -28,269 +25,66 @@ const ITEM_TYPES = [
   { value: 'OTHER', label: 'Khác', icon: '📦' },
 ];
 
-// Status badge
+const STATUS_FILTERS = [
+  { value: '', label: 'Tất cả trạng thái' },
+  { value: 'AVAILABLE', label: 'Còn hàng' },
+  { value: 'SOLD', label: 'Đã bán' },
+  { value: 'RESERVED', label: 'Đang giữ' },
+];
+
+const STATUS_BADGES = {
+  AVAILABLE: 'bg-green-500/10 text-green-400 border border-green-500/20',
+  SOLD: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+  RESERVED: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+  EXPIRED: 'bg-red-500/10 text-red-400 border border-red-500/20',
+};
+
+const STATUS_LABELS = {
+  AVAILABLE: 'Còn hàng',
+  SOLD: 'Đã bán',
+  RESERVED: 'Đang giữ',
+  EXPIRED: 'Hết hạn',
+};
+
 function StatusBadge({ status }) {
-  const map = {
-    AVAILABLE: { label: 'Còn hàng', cls: 'bg-green-500/10 text-green-400 border border-green-500/20' },
-    SOLD: { label: 'Đã bán', cls: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
-    RESERVED: { label: 'Đang giữ', cls: 'bg-amber-500/10 text-amber-400 border border-amber-500/20' },
-    EXPIRED: { label: 'Hết hạn', cls: 'bg-red-500/10 text-red-400 border border-red-500/20' },
-  };
-  const s = map[status] || { label: status, cls: 'bg-gray-500/10 text-gray-400 border border-gray-500/20' };
-  return <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${s.cls}`}>{s.label}</span>;
+  const cls = STATUS_BADGES[status] || 'bg-gray-500/10 text-gray-400 border border-gray-500/20';
+  const label = STATUS_LABELS[status] || status;
+  return <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${cls}`}>{label}</span>;
 }
 
-// Skeleton loader row
 function SkeletonRow() {
   return (
     <tr>
       {[...Array(6)].map((_, i) => (
         <td key={i} className="px-4 py-3">
-          <div className="h-4 bg-white/5 rounded animate-pulse" style={{ width: `${60 + Math.random() * 40}%` }} />
+          <div className="h-4 bg-white/5 rounded animate-pulse" style={{ width: `${60 + ((i * 13) % 40)}%` }} />
         </td>
       ))}
     </tr>
   );
 }
 
-// Modal Bulk Add Inventory
-function BulkAddModal({ product, onClose, onSuccess }) {
-  const [type, setType] = useState('LICENSE_KEY');
-  const [rawText, setRawText] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const lines = rawText.split('\n').filter(l => l.trim() !== '');
-
-  const handleSubmit = async () => {
-    if (lines.length === 0) {
-      toast.error('Vui lòng nhập ít nhất 1 item');
-      return;
-    }
-    setLoading(true);
-    const toastId = toast.loading(`Đang nạp ${lines.length} items...`);
-    try {
-      const items = lines.map(line => ({ value: line.trim(), type }));
-      const res = await addBulkInventory(product.id, items);
-      const added = res.data?.length ?? lines.length;
-      toast.success(`✅ Đã nạp thành công ${added} items vào "${product.name}"`, { id: toastId });
-      onSuccess();
-      onClose();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Lỗi khi nạp hàng', { id: toastId });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
-        onClick={onClose}
-      />
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-[#0f172a] rounded-2xl border border-white/10 shadow-2xl z-50 overflow-hidden"
-      >
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-gradient-to-r from-blue-600/10 to-purple-600/10">
-          <div>
-            <h2 className="text-lg font-bold flex items-center gap-2">
-              <Upload className="w-5 h-5 text-blue-400" />
-              Nạp hàng hàng loạt
-            </h2>
-            <p className="text-sm text-gray-400 mt-0.5">
-              Sản phẩm: <span className="text-white font-medium">{product?.name}</span>
-            </p>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/10 text-gray-400 transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
-          {/* Type selector */}
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-3">Loại hàng</label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {ITEM_TYPES.map(t => (
-                <button
-                  key={t.value}
-                  onClick={() => setType(t.value)}
-                  className={`p-3 rounded-xl border text-left transition-all ${
-                    type === t.value
-                      ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
-                      : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
-                  }`}
-                >
-                  <span className="text-xl">{t.icon}</span>
-                  <p className="text-xs font-medium mt-1 leading-tight">{t.label}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Textarea */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-gray-400">
-                Danh sách items <span className="text-gray-600">(mỗi dòng = 1 item)</span>
-              </label>
-              {lines.length > 0 && (
-                <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-medium">
-                  {lines.length} items
-                </span>
-              )}
-            </div>
-            <textarea
-              value={rawText}
-              onChange={e => setRawText(e.target.value)}
-              rows={12}
-              placeholder={
-                type === 'LICENSE_KEY'
-                  ? 'XXXX-YYYY-ZZZZ-AAAA\nBBBB-CCCC-DDDD-EEEE\n...'
-                  : type === 'ACCOUNT'
-                  ? 'email@example.com:password123\nuser2@example.com:pass456\n...'
-                  : type === 'LINK'
-                  ? 'https://drive.google.com/file/xxx\nhttps://mega.nz/file/yyy\n...'
-                  : 'Nhập dữ liệu, mỗi dòng 1 item...'
-              }
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 transition-colors font-mono resize-none"
-            />
-          </div>
-
-          {/* Preview */}
-          {lines.length > 0 && (
-            <div>
-              <p className="text-xs text-gray-500 mb-2 font-medium">Preview (5 items đầu):</p>
-              <div className="bg-[#060d1f] rounded-xl p-3 border border-white/5 space-y-1.5">
-                {lines.slice(0, 5).map((line, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <span className="text-xs text-gray-600 w-5 text-right shrink-0">{i + 1}.</span>
-                    <span className="text-xs font-mono text-green-400 truncate">
-                      {line.length > 50 ? line.substring(0, 50) + '...' : line}
-                    </span>
-                  </div>
-                ))}
-                {lines.length > 5 && (
-                  <p className="text-xs text-gray-500 pl-7">... và {lines.length - 5} items khác</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Warning */}
-          <div className="flex items-start gap-3 p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-400/80">
-              Items trùng lặp sẽ bị bỏ qua. Đảm bảo không có khoảng trắng thừa đầu/cuối dòng.
-            </p>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-white/5 flex items-center justify-between gap-3">
-          <button
-            onClick={() => setRawText('')}
-            disabled={!rawText}
-            className="px-4 py-2 rounded-xl bg-white/5 text-sm font-medium hover:bg-white/10 transition-colors disabled:opacity-50"
-          >
-            Xoá trắng
-          </button>
-          <div className="flex gap-3">
-            <button onClick={onClose} className="px-4 py-2 rounded-xl bg-white/5 text-sm font-medium hover:bg-white/10 transition-colors">
-              Huỷ
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={loading || lines.length === 0}
-              className="px-6 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {loading ? (
-                <><RefreshCw className="w-4 h-4 animate-spin" /> Đang nạp...</>
-              ) : (
-                <><Upload className="w-4 h-4" /> Nạp {lines.length > 0 ? `${lines.length} ` : ''}items</>
-              )}
-            </button>
-          </div>
-        </div>
-      </motion.div>
-    </>
-  );
-}
-
-// Confirm Delete Modal
-function ConfirmDeleteModal({ item, onClose, onConfirm, loading }) {
-  return (
-    <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
-        onClick={onClose}
-      />
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-[#0f172a] rounded-2xl border border-white/10 shadow-2xl z-50 p-6"
-      >
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
-            <Trash2 className="w-6 h-6 text-red-400" />
-          </div>
-          <div>
-            <h3 className="font-bold">Xoá item này?</h3>
-            <p className="text-sm text-gray-400">Thao tác này không thể hoàn tác</p>
-          </div>
-        </div>
-        {item && (
-          <div className="bg-white/5 rounded-xl p-3 mb-5 font-mono text-sm text-gray-300">
-            {item.value?.substring(0, 40)}{(item.value?.length || 0) > 40 ? '...' : ''}
-          </div>
-        )}
-        <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 px-4 py-2 rounded-xl bg-white/5 text-sm font-medium hover:bg-white/10 transition-colors">
-            Huỷ
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className="flex-1 px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-            Xoá
-          </button>
-        </div>
-      </motion.div>
-    </>
-  );
-}
-
-// Masked value component
 function MaskedValue({ value }) {
   const [visible, setVisible] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(value || '');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Không thể copy vào clipboard');
+    }
   };
 
-  const display = visible ? value : (value?.substring(0, 8) + '••••••••');
+  const display = visible ? value : `${(value || '').substring(0, 8)}••••••••`;
 
   return (
     <div className="flex items-center gap-2">
-      <span className="font-mono text-sm text-gray-300">{display}</span>
+      <span className="font-mono text-sm text-gray-300">{display || '—'}</span>
       <button
-        onClick={() => setVisible(v => !v)}
+        onClick={() => setVisible((v) => !v)}
         className="p-1 rounded hover:bg-white/10 text-gray-500 hover:text-gray-300 transition-colors"
         title={visible ? 'Ẩn' : 'Hiện'}
       >
@@ -307,117 +101,258 @@ function MaskedValue({ value }) {
   );
 }
 
-// ─── Main Component ──────────────────────────────────────────────────────────
+const PLACEHOLDERS = {
+  LICENSE_KEY: 'XXXX-YYYY-ZZZZ-AAAA\nBBBB-CCCC-DDDD-EEEE\n...',
+  ACCOUNT: 'email@example.com:password123\nuser2@example.com:pass456\n...',
+  LINK: 'https://drive.google.com/file/xxx\nhttps://mega.nz/file/yyy\n...',
+  OTHER: 'Nhập dữ liệu, mỗi dòng 1 item...',
+};
+
+function BulkAddModal({ product, onClose, onSuccess }) {
+  const [type, setType] = useState('LICENSE_KEY');
+  const [rawText, setRawText] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const lines = rawText.split('\n').map((l) => l.trim()).filter((l) => l !== '');
+  const uniqueLines = Array.from(new Set(lines));
+  const duplicateCount = lines.length - uniqueLines.length;
+
+  const handleSubmit = async () => {
+    if (uniqueLines.length === 0) {
+      toast.error('Vui lòng nhập ít nhất 1 item');
+      return;
+    }
+    setLoading(true);
+    const toastId = toast.loading(`Đang nạp ${uniqueLines.length} items...`);
+    try {
+      const items = uniqueLines.map((value) => ({ value, type }));
+      const res = await adminApi.addBulkInventory(product.id, items);
+      const added = res.data?.data?.length ?? uniqueLines.length;
+      toast.success(`✅ Đã nạp thành công ${added} items vào "${product.name}"`, { id: toastId });
+      onSuccess();
+      onClose();
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Lỗi khi nạp hàng';
+      toast.error(msg, { id: toastId });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Modal isOpen onClose={onClose} size="2xl">
+      <div className="flex items-start justify-between -mt-2 mb-4">
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Upload className="w-5 h-5 text-blue-400" />
+            Nạp hàng hàng loạt
+          </h2>
+          <p className="text-sm text-gray-400 mt-1">
+            Sản phẩm: <span className="text-white font-medium">{product?.name}</span>
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
+        {/* Type selector */}
+        <div>
+          <label className="block text-sm font-medium text-gray-400 mb-3">Loại hàng</label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {ITEM_TYPES.map((itemType) => (
+              <button
+                key={itemType.value}
+                onClick={() => setType(itemType.value)}
+                className={`p-3 rounded-xl border text-left transition-all ${
+                  type === itemType.value
+                    ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
+                    : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
+                }`}
+              >
+                <span className="text-xl">{itemType.icon}</span>
+                <p className="text-xs font-medium mt-1 leading-tight">{itemType.label}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Textarea */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium text-gray-400">
+              Danh sách items <span className="text-gray-600">(mỗi dòng = 1 item)</span>
+            </label>
+            {lines.length > 0 && (
+              <div className="flex items-center gap-2 text-xs">
+                <span className="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-medium">
+                  {uniqueLines.length} items hợp lệ
+                </span>
+                {duplicateCount > 0 && (
+                  <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full font-medium">
+                    {duplicateCount} trùng lặp
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+          <textarea
+            value={rawText}
+            onChange={(e) => setRawText(e.target.value)}
+            rows={12}
+            placeholder={PLACEHOLDERS[type] || PLACEHOLDERS.OTHER}
+            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 transition-colors font-mono resize-none"
+          />
+        </div>
+
+        {/* Preview */}
+        {uniqueLines.length > 0 && (
+          <div>
+            <p className="text-xs text-gray-500 mb-2 font-medium">Preview (5 items đầu):</p>
+            <div className="bg-[#060d1f] rounded-xl p-3 border border-white/5 space-y-1.5">
+              {uniqueLines.slice(0, 5).map((line, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="text-xs text-gray-600 w-5 text-right shrink-0">{i + 1}.</span>
+                  <span className="text-xs font-mono text-green-400 truncate">
+                    {line.length > 50 ? `${line.substring(0, 50)}...` : line}
+                  </span>
+                </div>
+              ))}
+              {uniqueLines.length > 5 && (
+                <p className="text-xs text-gray-500 pl-7">... và {uniqueLines.length - 5} items khác</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Warning */}
+        <div className="flex items-start gap-3 p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="text-xs text-amber-400/80 space-y-0.5">
+            <p>Items trùng lặp trong danh sách sẽ bị loại bỏ tự động.</p>
+            <p>Đảm bảo không có khoảng trắng thừa đầu/cuối dòng.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-5 mt-5 border-t border-white/5">
+        <button
+          onClick={() => setRawText('')}
+          disabled={!rawText}
+          className="px-4 py-2 rounded-xl bg-white/5 text-sm font-medium hover:bg-white/10 transition-colors disabled:opacity-50"
+        >
+          Xoá trắng
+        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl bg-white/5 text-sm font-medium hover:bg-white/10 transition-colors"
+          >
+            Huỷ
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={loading || uniqueLines.length === 0}
+            className="px-6 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {loading ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" /> Đang nạp...
+              </>
+            ) : (
+              <>
+                <Upload className="w-4 h-4" /> Nạp {uniqueLines.length > 0 ? `${uniqueLines.length} ` : ''}items
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+const STOCK_BADGE = (available) => {
+  if (available === 0) return { label: '🚨 Hết', cls: 'text-red-400', bg: 'bg-red-500/10' };
+  if (available <= 5) return { label: '⚠️ Thấp', cls: 'text-amber-400', bg: 'bg-amber-500/10' };
+  return { label: '✅ Tốt', cls: 'text-green-400', bg: 'bg-green-500/10' };
+};
 
 export default function AdminInventory() {
   const { t } = useTranslation();
 
-  // State
-  const [products, setProducts] = useState([]);
+  // Products list
+  const {
+    data: productsData,
+    loading: loadingProducts,
+    load: reloadProducts,
+  } = useAdminData(() => adminApi.getProducts({ limit: 100 }), { autoLoad: true });
+
+  const products = Array.isArray(productsData) ? productsData : [];
+
   const [selectedProductId, setSelectedProductId] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [inventoryItems, setInventoryItems] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [pagination, setPagination] = useState({ total: 0, totalPages: 0 });
+  const selectedProduct = products.find((p) => String(p.id) === String(selectedProductId)) || null;
+
+  // Auto-select first product when list loads
+  useEffect(() => {
+    if (!selectedProductId && products.length > 0) {
+      setSelectedProductId(String(products[0].id));
+    }
+  }, [products, selectedProductId]);
+
+  // Pagination / filters state for the items list
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
 
-  const [loadingProducts, setLoadingProducts] = useState(true);
-  const [loadingInventory, setLoadingInventory] = useState(false);
-  const [loadingStats, setLoadingStats] = useState(false);
+  // Inventory items for the selected product
+  const fetchInventory = useCallback(
+    () => adminApi.getInventoryByProduct(selectedProductId, {
+      page: currentPage,
+      limit: ITEMS_PER_PAGE,
+      status: statusFilter || undefined,
+    }),
+    [selectedProductId, currentPage, statusFilter]
+  );
+
+  const {
+    data: inventoryData,
+    pagination,
+    loading: loadingInventory,
+    load: reloadInventory,
+  } = useAdminData(fetchInventory, {
+    autoLoad: !!selectedProductId,
+    initialData: [],
+    deps: [selectedProductId, currentPage, statusFilter],
+  });
+
+  // Inventory stats
+  const fetchStats = useCallback(
+    () => adminApi.getInventoryStats(selectedProductId),
+    [selectedProductId]
+  );
+
+  const {
+    data: stats,
+    loading: loadingStats,
+    load: reloadStats,
+  } = useAdminData(fetchStats, { autoLoad: !!selectedProductId, deps: [selectedProductId] });
+
+  // Reset page when product/status changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedProductId, statusFilter]);
 
   const [showBulkAdd, setShowBulkAdd] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
-  const ITEMS_PER_PAGE = 20;
-
-  // Load products list
-  useEffect(() => {
-    const loadProducts = async () => {
-      setLoadingProducts(true);
-      try {
-        const res = await getProducts({ limit: 100 });
-        const list = res.data || [];
-        setProducts(list);
-        if (list.length > 0) {
-          setSelectedProductId(list[0].id);
-        }
-      } catch (err) {
-        toast.error('Không thể tải danh sách sản phẩm');
-      } finally {
-        setLoadingProducts(false);
-      }
-    };
-    loadProducts();
-  }, []);
-
-  // Update selected product object
-  useEffect(() => {
-    if (selectedProductId && products.length > 0) {
-      const p = products.find(p => p.id === selectedProductId || p.id === parseInt(selectedProductId));
-      setSelectedProduct(p || null);
-      setCurrentPage(1);
-    }
-  }, [selectedProductId, products]);
-
-  // Load inventory items
-  const loadInventory = useCallback(async () => {
-    if (!selectedProductId) return;
-    setLoadingInventory(true);
-    try {
-      const res = await getInventoryByProduct(selectedProductId, {
-        page: currentPage,
-        limit: ITEMS_PER_PAGE,
-        status: statusFilter || undefined,
-      });
-      // Normalize backend fields: content → value, extraData.type → type
-      const rawItems = res.data || [];
-      const items = rawItems.map(item => ({
-        ...item,
-        value: item.value ?? item.content ?? '',
-        type: item.type ?? item.extraData?.type ?? 'LICENSE_KEY',
-      }));
-      setInventoryItems(items);
-      setPagination(res.pagination || { total: items.length, totalPages: 1 });
-    } catch (err) {
-      toast.error('Không thể tải inventory');
-      setInventoryItems([]);
-    } finally {
-      setLoadingInventory(false);
-    }
-  }, [selectedProductId, currentPage, statusFilter]);
-
-  // Load inventory stats
-  const loadStats = useCallback(async () => {
-    if (!selectedProductId) return;
-    setLoadingStats(true);
-    try {
-      const res = await getInventoryStats(selectedProductId);
-      setStats(res.data || null);
-    } catch {
-      setStats(null);
-    } finally {
-      setLoadingStats(false);
-    }
-  }, [selectedProductId]);
-
-  useEffect(() => {
-    loadInventory();
-    loadStats();
-  }, [loadInventory, loadStats]);
-
-  // Delete item
   const handleDelete = async () => {
     if (!deleteItem) return;
     setDeletingId(deleteItem.id);
     try {
-      await deleteInventoryItem(deleteItem.id);
+      await adminApi.deleteInventoryItem(deleteItem.id);
       toast.success('Đã xoá item');
       setDeleteItem(null);
-      loadInventory();
-      loadStats();
+      reloadInventory();
+      reloadStats();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Xoá thất bại');
     } finally {
@@ -425,50 +360,38 @@ export default function AdminInventory() {
     }
   };
 
-  // Filter items by search
-  const filteredItems = search
-    ? inventoryItems.filter(item =>
-        item.value?.toLowerCase().includes(search.toLowerCase()) ||
-        item.type?.toLowerCase().includes(search.toLowerCase())
-      )
-    : inventoryItems;
+  // Normalize items: backend returns { content, extraData: { type } }
+  const items = (inventoryData || []).map((item) => ({
+    ...item,
+    value: item.value ?? item.content ?? '',
+    type: item.type ?? item.extraData?.type ?? 'LICENSE_KEY',
+  }));
 
-  // Stats cards data
+  const filteredItems = search
+    ? items.filter((item) =>
+        (item.value || '').toLowerCase().includes(search.toLowerCase()) ||
+        (item.type || '').toLowerCase().includes(search.toLowerCase())
+      )
+    : items;
+
+  const stockBadge = stats ? STOCK_BADGE(stats.available ?? 0) : null;
+
   const statCards = [
-    {
-      label: 'Tổng items',
-      value: stats?.total ?? 0,
-      icon: Boxes,
-      color: 'text-white',
-      iconBg: 'bg-blue-500/10',
-    },
-    {
-      label: 'Còn hàng',
-      value: stats?.available ?? 0,
-      icon: CheckCircle,
-      color: 'text-green-400',
-      iconBg: 'bg-green-500/10',
-    },
-    {
-      label: 'Đã bán',
-      value: stats?.sold ?? 0,
-      icon: TrendingUp,
-      color: 'text-blue-400',
-      iconBg: 'bg-blue-500/10',
-    },
-    {
-      label: 'Cảnh báo kho',
-      value: stats?.available <= 5 && stats?.available > 0 ? '⚠️ Thấp' : stats?.available === 0 ? '🚨 Hết' : '✅ Tốt',
-      icon: AlertTriangle,
-      color: stats?.available === 0 ? 'text-red-400' : stats?.available <= 5 ? 'text-amber-400' : 'text-green-400',
-      iconBg: stats?.available === 0 ? 'bg-red-500/10' : stats?.available <= 5 ? 'bg-amber-500/10' : 'bg-green-500/10',
-      isText: true,
-    },
+    { label: 'Tổng items', value: stats?.total ?? 0, icon: Boxes, cls: 'text-white', bg: 'bg-blue-500/10' },
+    { label: 'Còn hàng', value: stats?.available ?? 0, icon: CheckCircle, cls: 'text-green-400', bg: 'bg-green-500/10' },
+    { label: 'Đã bán', value: stats?.sold ?? 0, icon: TrendingUp, cls: 'text-blue-400', bg: 'bg-blue-500/10' },
+    { label: 'Cảnh báo kho', value: stockBadge?.label || '—', icon: AlertTriangle, cls: stockBadge?.cls || 'text-gray-400', bg: stockBadge?.bg || 'bg-white/5', isText: true },
   ];
+
+  // Mini chart of last 7 days based on stats (if available)
+  const chartData = (stats?.recentTrend || []).map((row) => ({
+    name: row.date,
+    stock: row.available,
+  }));
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Quản lý Kho hàng</h1>
@@ -476,15 +399,16 @@ export default function AdminInventory() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => { loadInventory(); loadStats(); }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+            onClick={() => { reloadInventory(); reloadStats(); }}
+            disabled={!selectedProductId}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors disabled:opacity-50"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className={`w-4 h-4 ${loadingInventory ? 'animate-spin' : ''}`} />
             Làm mới
           </button>
           <button
             onClick={() => setShowBulkAdd(true)}
-            disabled={!selectedProductId}
+            disabled={!selectedProduct}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Upload className="w-4 h-4" />
@@ -505,11 +429,11 @@ export default function AdminInventory() {
         ) : (
           <select
             value={selectedProductId}
-            onChange={e => setSelectedProductId(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-colors cursor-pointer"
+            onChange={(e) => setSelectedProductId(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-blue-500/50 cursor-pointer"
           >
             {products.length === 0 && <option value="">Chưa có sản phẩm</option>}
-            {products.map(p => (
+            {products.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
@@ -536,10 +460,12 @@ export default function AdminInventory() {
                 </div>
               ) : (
                 <>
-                  <div className={`w-12 h-12 rounded-xl ${card.iconBg} flex items-center justify-center ${card.color}`}>
+                  <div className={`w-12 h-12 rounded-xl ${card.bg} flex items-center justify-center ${card.cls}`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <p className="text-3xl font-bold mt-4">{card.isText ? card.value : card.value.toLocaleString()}</p>
+                  <p className={`text-3xl font-bold mt-4 ${card.cls}`}>
+                    {card.isText ? card.value : Number(card.value).toLocaleString()}
+                  </p>
                   <p className="text-sm text-gray-400 mt-1">{card.label}</p>
                 </>
               )}
@@ -563,22 +489,21 @@ export default function AdminInventory() {
               type="text"
               placeholder="Tìm kiếm item..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-colors"
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
             />
           </div>
           <select
             value={statusFilter}
-            onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-colors cursor-pointer"
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white cursor-pointer"
           >
-            <option value="">Tất cả trạng thái</option>
-            <option value="AVAILABLE">Còn hàng</option>
-            <option value="SOLD">Đã bán</option>
-            <option value="RESERVED">Đang giữ</option>
+            {STATUS_FILTERS.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
           </select>
-          <span className="px-4 py-2.5 text-sm text-gray-400 bg-white/5 rounded-xl border border-white/5">
-            {pagination.total} items
+          <span className="px-4 py-2.5 text-sm text-gray-400 bg-white/5 rounded-xl border border-white/5 whitespace-nowrap">
+            {pagination?.total ?? items.length} items
           </span>
         </div>
 
@@ -587,48 +512,51 @@ export default function AdminInventory() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-white/5">
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-10">#</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Loại</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Giá trị</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Ngày thêm</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Hành động</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase w-10">#</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Loại</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Giá trị</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Trạng thái</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Ngày thêm</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">Hành động</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {loadingInventory
-                ? [...Array(5)].map((_, i) => <SkeletonRow key={i} />)
-                : filteredItems.length === 0
-                  ? (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-12 text-center">
-                        <div className="flex flex-col items-center gap-3 text-gray-500">
-                          <Package className="w-12 h-12 opacity-30" />
-                          <p className="font-medium">
-                            {selectedProductId ? 'Kho trống — hãy nạp hàng ngay!' : 'Chọn sản phẩm để xem kho'}
-                          </p>
-                          {selectedProductId && (
-                            <button
-                              onClick={() => setShowBulkAdd(true)}
-                              className="mt-2 flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 text-sm font-medium hover:bg-blue-600 transition-colors text-white"
-                            >
-                              <Upload className="w-4 h-4" />
-                              Nạp hàng ngay
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                  : filteredItems.map((item, idx) => (
+              {loadingInventory ? (
+                [...Array(5)].map((_, i) => <SkeletonRow key={i} />)
+              ) : !selectedProductId ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                    <User className="w-10 h-10 mx-auto opacity-30 mb-2" />
+                    <p>Chọn sản phẩm để xem kho</p>
+                  </td>
+                </tr>
+              ) : filteredItems.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-12 text-center">
+                    <div className="flex flex-col items-center gap-3 text-gray-500">
+                      <Package className="w-12 h-12 opacity-30" />
+                      <p className="font-medium">Kho trống — hãy nạp hàng ngay!</p>
+                      <button
+                        onClick={() => setShowBulkAdd(true)}
+                        className="mt-2 flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 text-sm font-medium hover:bg-blue-600 transition-colors text-white"
+                      >
+                        <Upload className="w-4 h-4" />
+                        Nạp hàng ngay
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredItems.map((item, idx) => {
+                  const meta = ITEM_TYPES.find((t) => t.value === item.type);
+                  return (
                     <tr key={item.id} className="hover:bg-white/5 transition-colors">
                       <td className="px-4 py-3 text-xs text-gray-600">
                         {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-sm text-gray-300">
-                          {ITEM_TYPES.find(t => t.value === item.type)?.icon}{' '}
-                          {ITEM_TYPES.find(t => t.value === item.type)?.label || item.type}
+                          {meta?.icon} {meta?.label || item.type}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -661,70 +589,41 @@ export default function AdminInventory() {
                         </div>
                       </td>
                     </tr>
-                  ))
-              }
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
 
-        {/* Pagination */}
-        {pagination.totalPages > 1 && (
+        {pagination && pagination.totalPages > 1 && (
           <div className="px-4 py-3 border-t border-white/5 flex items-center justify-between">
             <p className="text-sm text-gray-400">
               Trang {currentPage}/{pagination.totalPages} · {pagination.total} items
             </p>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="p-2 rounded-lg hover:bg-white/10 text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              {[...Array(Math.min(pagination.totalPages, 5))].map((_, i) => {
-                const page = i + 1;
-                return (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
-                      currentPage === page ? 'bg-blue-500 text-white' : 'text-gray-400 hover:bg-white/10'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-              <button
-                onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))}
-                disabled={currentPage === pagination.totalPages}
-                className="p-2 rounded-lg hover:bg-white/10 text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+            <Pagination currentPage={currentPage} totalPages={pagination.totalPages} onPageChange={setCurrentPage} />
           </div>
         )}
       </motion.div>
 
       {/* Modals */}
-      <AnimatePresence>
-        {showBulkAdd && selectedProduct && (
-          <BulkAddModal
-            product={selectedProduct}
-            onClose={() => setShowBulkAdd(false)}
-            onSuccess={() => { loadInventory(); loadStats(); }}
-          />
-        )}
-        {deleteItem && (
-          <ConfirmDeleteModal
-            item={deleteItem}
-            onClose={() => setDeleteItem(null)}
-            onConfirm={handleDelete}
-            loading={deletingId === deleteItem.id}
-          />
-        )}
-      </AnimatePresence>
+      {showBulkAdd && selectedProduct && (
+        <BulkAddModal
+          product={selectedProduct}
+          onClose={() => setShowBulkAdd(false)}
+          onSuccess={() => { reloadInventory(); reloadStats(); reloadProducts(); }}
+        />
+      )}
+
+      <ConfirmModal
+        isOpen={!!deleteItem}
+        onClose={() => setDeleteItem(null)}
+        onConfirm={handleDelete}
+        title="Xoá item này?"
+        message="Thao tác này không thể hoàn tác."
+        confirmLabel="Xoá"
+        loading={deletingId === deleteItem?.id}
+      />
     </div>
   );
 }
