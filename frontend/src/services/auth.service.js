@@ -3,7 +3,7 @@
  * Handles all authentication API calls
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -23,24 +23,32 @@ export const authService = {
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await response.json();
+    const res = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Login failed');
+      throw new Error(res.message || res.error || 'Login failed');
     }
 
+    // Support both response formats:
+    // Format A: { success, data: { user, accessToken, refreshToken } }
+    // Format B: { user, token, refreshToken } (old format)
+    const payload = res.data || res;
+    const token = payload.accessToken || payload.token;
+    const refreshToken = payload.refreshToken;
+    const user = payload.user || res.user;
+
     // Store tokens
-    if (data.token) {
-      localStorage.setItem('token', data.token);
+    if (token) {
+      localStorage.setItem('token', token);
     }
-    if (data.refreshToken) {
-      localStorage.setItem('refreshToken', data.refreshToken);
+    if (refreshToken) {
+      localStorage.setItem('refreshToken', refreshToken);
     }
 
     return {
-      user: data.user,
-      token: data.token,
-      refreshToken: data.refreshToken,
+      user,
+      token,
+      refreshToken,
     };
   },
 
@@ -56,24 +64,28 @@ export const authService = {
       body: JSON.stringify({ email, password, name }),
     });
 
-    const data = await response.json();
+    const res = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Registration failed');
+      throw new Error(res.message || res.error || 'Registration failed');
     }
 
-    // Store tokens
-    if (data.token) {
-      localStorage.setItem('token', data.token);
+    const payload = res.data || res;
+    const token = payload.accessToken || payload.token;
+    const refreshToken = payload.refreshToken;
+    const user = payload.user || res.user;
+
+    if (token) {
+      localStorage.setItem('token', token);
     }
-    if (data.refreshToken) {
-      localStorage.setItem('refreshToken', data.refreshToken);
+    if (refreshToken) {
+      localStorage.setItem('refreshToken', refreshToken);
     }
 
     return {
-      user: data.user,
-      token: data.token,
-      refreshToken: data.refreshToken,
+      user,
+      token,
+      refreshToken,
     };
   },
 

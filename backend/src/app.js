@@ -1,43 +1,125 @@
 import express from 'express';
-import cors from 'cors';
 import helmet from 'helmet';
-import morgan from 'morgan';
+import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import { config } from './config/env.js';
-import { notFound, errorHandler } from './middleware/error.js';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import mongoSanitize from 'express-mongo-sanitize';
+import xss from 'xss-clean';
 
-import authRoutes from './routes/authRoutes.js';
-import categoryRoutes from './routes/categoryRoutes.js';
-import productRoutes from './routes/productRoutes.js';
-import orderRoutes from './routes/orderRoutes.js';
-import paymentRoutes from './routes/paymentRoutes.js';
-import affiliateRoutes from './routes/affiliateRoutes.js';
-import adminRoutes from './routes/adminRoutes.js';
-import telegramRoutes from './routes/telegramRoutes.js';
+import config from './config/index.js';
+import errorHandler from './middlewares/error.middleware.js';
+import notFound from './middlewares/notfound.middleware.js';
+import { maintenanceMiddleware } from './modules/settings/maintenance.middleware.js';
 
-export function createApp() {
-  const app = express();
-  app.use(helmet());
-  app.use(cors({ origin: config.frontendUrl, credentials: true }));
-  app.use(express.json({ limit: '1mb' }));
-  app.use(morgan('dev'));
+// Import routes
+import authRoutes from './modules/auth/routes.js';
+import productRoutes from './modules/products/routes.js';
+import categoryRoutes from './modules/categories/category.routes.js';
+import orderRoutes from './modules/orders/routes.js';
+import paymentRoutes from './modules/payments/routes.js';
+import inventoryRoutes from './modules/inventory/routes.js';
+import licenseRoutes from './modules/licenses/routes.js';
+import customerRoutes from './modules/customers/routes.js';
+import ticketRoutes from './modules/tickets/routes.js';
+import couponRoutes from './modules/coupons/routes.js';
+import affiliateRoutes from './modules/affiliates/routes.js';
+import analyticsRoutes from './modules/analytics/routes.js';
+import dashboardRoutes from './modules/dashboard/routes.js';
+import assetRoutes from './modules/assets/asset.routes.js';
+import reviewRoutes from './modules/reviews/review.routes.js';
+import cartRoutes from './modules/cart/cart.routes.js';
+import wishlistRoutes from './modules/wishlist/wishlist.routes.js';
+import auditRoutes from './modules/audit/routes.js';
+import broadcastRoutes from './modules/broadcast/broadcast.routes.js';
+import profileRoutes from './modules/profile/profile.routes.js';
+import settingsRoutes from './modules/settings/routes.js';
 
-  // Rate limit cho auth
-  const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30 });
-  const webhookLimiter = rateLimit({ windowMs: 60 * 1000, max: 60 });
+// Import webhooks
+import webhookRoutes from './webhooks/index.js';
 
-  app.get('/api/health', (req, res) => res.json({ ok: true }));
+const app = express();
 
-  app.use('/api/auth', authLimiter, authRoutes);
-  app.use('/api/categories', categoryRoutes);
-  app.use('/api/products', productRoutes);
-  app.use('/api/orders', orderRoutes);
-  app.use('/api/payment', webhookLimiter, paymentRoutes);
-  app.use('/api/affiliate', affiliateRoutes);
-  app.use('/api/admin', adminRoutes);
-  app.use('/api/telegram', telegramRoutes);
+// Security middleware
+app.use(helmet());
+app.use(xss());
+app.use(mongoSanitize());
 
-  app.use(notFound);
-  app.use(errorHandler);
-  return app;
-}
+// Compression
+app.use(compression());
+
+// Cookie parser
+app.use(cookieParser());
+
+// CORS
+app.use(cors({
+  origin: config.corsOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Body parser
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: config.rateLimit.windowMs,
+  max: config.rateLimit.maxRequests,
+  message: { error: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => config.nodeEnv !== 'production', // Bỏ qua hoàn toàn rate limit khi đang dev
+});
+app.use('/api/', limiter);
+
+// Stricter rate limit for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  message: { error: 'Too many login attempts, please try again later.' },
+  skip: (req) => config.nodeEnv !== 'production', // Bỏ qua rate limit login khi đang dev
+});
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/admin/login', authLimiter);
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Apply maintenance middleware (before routes, but after health check)
+app.use(maintenanceMiddleware);
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/licenses', licenseRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/tickets', ticketRoutes);
+app.use('/api/coupons', couponRoutes);
+app.use('/api/affiliates', affiliateRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/assets', assetRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/audit-logs', auditRoutes);
+app.use('/api/admin/broadcast', broadcastRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/settings', settingsRoutes);
+
+// Webhooks
+app.use('/webhooks', webhookRoutes);
+
+// Error handling
+app.use(notFound);
+app.use(errorHandler);
+
+export default app;

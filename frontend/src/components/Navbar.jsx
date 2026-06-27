@@ -1,12 +1,35 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useCartStore, useWishlistStore } from '../store';
+import { wishlistApi } from '../api';
 
 export default function Navbar({ onCartClick, cartCount }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const wishlistItems = useWishlistStore((s) => s.items);
+  
+  // Fetch wishlist count when user logs in
+  useEffect(() => {
+    if (user) {
+      fetchWishlistCount();
+    } else {
+      setWishlistCount(0);
+    }
+  }, [user, wishlistItems]);
+
+  const fetchWishlistCount = async () => {
+    try {
+      const res = await wishlistApi.getCount();
+      setWishlistCount(res.data?.count || res.data?.data?.count || 0);
+    } catch (error) {
+      // Fallback to local store count
+      setWishlistCount(wishlistItems.length);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -38,20 +61,41 @@ export default function Navbar({ onCartClick, cartCount }) {
         {/* Desktop Navigation - Centered */}
         <div className="hidden lg:flex items-center gap-1 absolute left-1/2 transform -translate-x-1/2">
           <NavLink to="/" icon="home">Trang chủ</NavLink>
+          <NavLink to="/products" icon="grid">Sản phẩm</NavLink>
           {user && (
             <>
+              <NavLink to="/wishlist" icon="heart">Yêu thích</NavLink>
+              <NavLink to="/licenses" icon="key">License</NavLink>
               <NavLink to="/dashboard" icon="user">Tài khoản</NavLink>
-              {user.role === 'admin' && (
+              {user.role === 'admin' || user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.role === 'MANAGER' || user.role === 'SUPPORT' || user.role === 'FINANCE' ? (
                 <NavLink to="/admin" icon="shield" highlight>Quản trị</NavLink>
-              )}
+              ) : null}
             </>
           )}
         </div>
 
         {/* Desktop Auth + Cart */}
         <div className="hidden lg:flex items-center gap-3">
+          {/* Wishlist */}
+          {user && (
+            <Link
+              to="/wishlist"
+              className="relative p-2 rounded-xl hover:bg-white/10 transition"
+              title="Yêu thích"
+            >
+              <svg className={`w-6 h-6 ${wishlistCount > 0 ? 'text-neon-magenta' : 'text-gray-300'}`} fill={wishlistCount > 0 ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-neon-magenta text-white text-xs rounded-full flex items-center justify-center">
+                  {wishlistCount > 9 ? '9+' : wishlistCount}
+                </span>
+              )}
+            </Link>
+          )}
+
           {/* Cart button */}
-          <button 
+          <button
             onClick={onCartClick}
             className="relative p-2 rounded-xl hover:bg-white/10 transition"
           >
@@ -89,7 +133,7 @@ export default function Navbar({ onCartClick, cartCount }) {
         </div>
 
         {/* Mobile Menu Button */}
-        <button 
+        <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition"
         >
@@ -115,7 +159,7 @@ export default function Navbar({ onCartClick, cartCount }) {
           >
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 mb-2">
-                <button 
+                <button
                   onClick={() => { onCartClick?.(); setMobileMenuOpen(false); }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/5"
                 >
@@ -126,10 +170,15 @@ export default function Navbar({ onCartClick, cartCount }) {
                 </button>
               </div>
               <MobileNavLink to="/" onClick={() => setMobileMenuOpen(false)}>Trang chủ</MobileNavLink>
+              <MobileNavLink to="/products" onClick={() => setMobileMenuOpen(false)}>Sản phẩm</MobileNavLink>
               {user && (
                 <>
+                  <MobileNavLink to="/wishlist" onClick={() => setMobileMenuOpen(false)}>Yêu thích</MobileNavLink>
+                  <MobileNavLink to="/licenses" onClick={() => setMobileMenuOpen(false)}>License</MobileNavLink>
+                  <MobileNavLink to="/support" onClick={() => setMobileMenuOpen(false)}>Hỗ trợ</MobileNavLink>
                   <MobileNavLink to="/dashboard" onClick={() => setMobileMenuOpen(false)}>Tài khoản</MobileNavLink>
-                  {user.role === 'admin' && (
+                  <MobileNavLink to="/profile" onClick={() => setMobileMenuOpen(false)}>Hồ sơ</MobileNavLink>
+                  {(user.role === 'admin' || user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.role === 'MANAGER') && (
                     <MobileNavLink to="/admin" onClick={() => setMobileMenuOpen(false)} highlight>Quản trị</MobileNavLink>
                   )}
                   <button onClick={handleLogout} className="btn-magenta w-full mt-2">Đăng xuất</button>
@@ -152,16 +201,19 @@ export default function Navbar({ onCartClick, cartCount }) {
 function NavLink({ to, icon, children, highlight }) {
   const icons = {
     home: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
+    grid: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>,
     user: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>,
     shield: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
+    heart: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>,
+    key: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>,
   };
 
   return (
     <Link
       to={to}
       className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-        highlight 
-          ? 'text-neon-gold hover:bg-neon-gold/10' 
+        highlight
+          ? 'text-neon-gold hover:bg-neon-gold/10'
           : 'text-gray-300 hover:text-white hover:bg-white/5'
       }`}
     >
@@ -177,8 +229,8 @@ function MobileNavLink({ to, onClick, children, highlight }) {
       to={to}
       onClick={onClick}
       className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-        highlight 
-          ? 'text-neon-gold bg-neon-gold/10' 
+        highlight
+          ? 'text-neon-gold bg-neon-gold/10'
           : 'text-gray-300 hover:bg-white/5'
       }`}
     >

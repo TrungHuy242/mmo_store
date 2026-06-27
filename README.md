@@ -1,147 +1,550 @@
-# MMO Store
+# MMO-Store Premium
 
-Hệ thống **website + Telegram bot** bán sản phẩm MMO (sản phẩm số: tài khoản, proxy, tool, sms, thẻ cào, khóa học, data...). Giao hàng **tự động** sau khi thanh toán, hỗ trợ **affiliate 10%**, **admin panel** đầy đủ.
+<div align="center">
 
-## Công nghệ
+![Cyberpunk Store](https://img.shields.io/badge/MMO--Store-Premium-FF00FF?style=for-the-badge&labelColor=0a0a0a)
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat-square&logo=postgresql&logoColor=white)
+![License](https://img.shields.io/badge/License-Proprietary-FF6B6B?style=flat-square)
 
-- **Frontend:** React 18 + Vite + Tailwind CSS + Framer Motion + React Router DOM
-- **Backend:** Node.js + Express + PostgreSQL + JWT
-- **Telegram bot:** node-telegram-bot-api (webhook, có polling cho dev)
-- **Thanh toán:** USDT TRC20 (TronGrid), VietQR/Bank (Casso webhook), Thẻ cào (TheSieuRe)
-- **Email:** Nodemailer SMTP
-- **Deploy:** Docker + docker-compose
+**Hệ thống mua bán sản phẩm kỹ thuật số tự động 24/7**
 
-## Cấu trúc
+*Chào mừng đến với thế hệ cửa hàng số tiếp theo*
 
-```
-mmo-store/
-  backend/         # Express API + Telegram bot + payment + cron
-  frontend/        # React + Vite + Tailwind
-  docker-compose.yml
-```
-
-## Tính năng chính
-
-- Đăng ký / đăng nhập (JWT), liên kết Telegram
-- Danh sách sản phẩm theo danh mục + tìm kiếm + flash sale countdown
-- Giỏ hàng / checkout, **auto-delivery** qua email + Telegram
-- Affiliate 10% hoa hồng, rút tiền
-- Live inventory (kho tự giảm, admin nạp thêm)
-- Admin: CRUD sản phẩm/danh mục, duyệt đơn, sửa số dư, export Excel, broadcast Telegram
-- Tự động: cảnh báo hết hàng (<5), báo cáo doanh thu hàng ngày qua Telegram
-
-## Bảo mật
-
-- Secret nằm trong `.env` (không commit). Có `.env.example`, `.gitignore` chặn `.env` thật.
-- Webhook Casso/Telegram/thẻ cào đều verify chữ ký/secret.
-- Dữ liệu giao hàng nhạy cảm (user/pass) được **mã hóa AES-256-GCM** trong DB.
-- Mật khẩu hash bcrypt, JWT có expiry, rate limit, helmet, CORS.
+</div>
 
 ---
 
-## 1. Chạy chế độ DEV (không Docker)
+## Giới thiệu
 
-### Backend
+**MMO-Store Premium** là nền tảng tối tân hỗ trợ bán các sản phẩm kỹ thuật số với cơ chế giao hàng và kích hoạt tự động hoàn toàn.
 
-```bash
-cd backend
-cp .env.example .env   # điền các biến (xem bên dưới)
-npm install
-npm run seed           # tạo admin + danh mục + sản phẩm mẫu
-npm run dev            # chạy tại http://localhost:5000
+### Sản phẩm được hỗ trợ
+
+| Danh mục | Ví dụ |
+|----------|-------|
+| :key: **Tài khoản Premium** | Netflix, Spotify, Disney+, YouTube Premium... |
+| :globe_with_meridians: **Proxy** | HTTP, SOCKS5, Residential proxies |
+| :wrench: **Tools & Software** | Automation tools, SEO tools, MMO tools |
+| :ticket: **License Keys** | Phần mềm, game, dịch vụ số |
+| :book: **Source Code** | Scripts, bots, templates, themes |
+
+---
+
+## Tính năng nổi bật
+
+### :art: Giao diện Cyberpunk Glassmorphism
+
 ```
+✓ Dark Theme tối ưu cho trải nghiệm mua sắm
+✓ Hiệu ứng Glassmorphism hiện đại
+✓ Responsive 100% - Desktop, Tablet, Mobile
+✓ Animations mượt mà với Framer Motion
+✓ Retro Sci-Fi Sound Effects cho tương tác
+```
+
+### :credit_card: Thanh toán đa kênh
+
+| Phương thức | Mô tả | Xác nhận |
+|--------------|--------|-----------|
+| **VietQR** | Quét mã QR thanh toán | Auto (Casso Webhook) |
+| **USDT TRC20** | Chuyển USDT qua mạng TRON | Auto (TronGrid) |
+| **Thẻ cào** | Nạp qua thẻ điện thoại | TheSieuRe API |
+| **Số dư** | Thanh toán bằng ví tích hợp | Instant |
+
+### :package: Hệ thống phát hàng tự động
+
+```
+┌─────────────────────────────────────────────┐
+│  ✅ Auto-Delivery Engine                   │
+├─────────────────────────────────────────────┤
+│  • License Keys độc lập cho từng khách     │
+│  • Account credentials được mã hóa AES-256 │
+│  • Giao qua Email + Telegram tức thì       │
+│  • Digital downloads với link có expiry    │
+└─────────────────────────────────────────────┘
+```
+
+### :shield: Admin Panel toàn năng
+
+```
+📦 Quản lý Kho hàng    → Bulk Add, Import/Export Excel
+📊 Logs Hệ thống       → Audit Logs theo dõi mọi hành động
+🎫 Ticket Hỗ trợ       → Quản lý tickets từ khách hàng
+🎟️ Coupons             → Mã giảm giá linh hoạt (% hoặc VND)
+💰 Giao dịch           → Duyệt/rút tiền affiliate
+📈 Báo cáo             → Doanh thu, đơn hàng, inventory
+```
+
+### :robot: Tích hợp Telegram Bot
+
+```
+┌─────────────────────────────────────────────┐
+│  🤖 Bot Commands                            │
+├─────────────────────────────────────────────┤
+│  /start     → Chào mừng & liên kết TK     │
+│  /products  → Danh sách sản phẩm           │
+│  /order     → Kiểm tra trạng thái đơn     │
+│  /aff       → Quản lý affiliate           │
+│  /balance   → Kiểm tra số dư              │
+│  /help      → Hướng dẫn sử dụng           │
+└─────────────────────────────────────────────┘
+
+📢 Thông báo tự động:
+   • Đơn hàng mới → Admin nhận notification
+   • Lỗi hệ thống → Alert qua Telegram
+   • Bảo mật → OTP/2FA thông qua Telegram
+```
+
+### :money_with_wings: Hệ thống Affiliate
+
+```
+┌─────────────────────────────────────────────┐
+│  10% Hoa hồng cho người giới thiệu         │
+├─────────────────────────────────────────────┤
+│  • Link giới thiệu riêng cho từng user    │
+│  • Dashboard theo dõi hoa hồng             │
+│  • Rút tiền tự động qua VietQR/USDT       │
+│  • Auto-settlement hàng ngày               │
+└─────────────────────────────────────────────┘
+```
+
+---
+
+## Tech Stack
 
 ### Frontend
 
-```bash
-cd frontend
-cp .env.example .env   # VITE_API_URL=http://localhost:5000/api
-npm install
-npm run dev            # chạy tại http://localhost:5173
+```
+React 18 + Vite
+├── State Management: Zustand
+├── Styling: Tailwind CSS
+├── Animations: Framer Motion
+├── Routing: React Router DOM v6
+├── i18n: react-i18next
+└── HTTP Client: Axios
 ```
 
-Đăng nhập admin mặc định: email/password lấy từ `ADMIN_EMAIL` / `ADMIN_PASSWORD` trong `backend/.env`.
+### Backend
+
+```
+Node.js + Express
+├── ORM: Prisma
+├── Database: PostgreSQL
+├── Auth: JWT + bcrypt
+├── Security: Helmet, CORS, Rate Limit
+├── Email: Nodemailer (SMTP)
+└── Payments: VietQR, USDT TRC20, Thẻ cào
+```
+
+### Infrastructure
+
+```
+Docker + Docker Compose
+├── Nginx (Reverse Proxy)
+├── PostgreSQL 15
+└── Node.js 18+
+```
 
 ---
 
-## 2. Chạy bằng Docker (khuyến nghị cho VPS)
+## Cấu trúc dự án
+
+```
+mmo-store/
+│
+├── 📂 backend/                          # Express API Server
+│   ├── 📂 prisma/
+│   │   ├── schema.prisma               # Database Schema
+│   │   └── migrations/                # DB Migrations
+│   ├── 📂 src/
+│   │   ├── 📂 modules/                # Feature Modules (Auth, Orders, Products...)
+│   │   │   ├── auth/                  # Authentication
+│   │   │   ├── products/              # Product Management
+│   │   │   ├── orders/               # Order Processing
+│   │   │   ├── payments/             # Payment Integration
+│   │   │   ├── inventory/            # Stock Management
+│   │   │   ├── licenses/             # License Keys
+│   │   │   ├── affiliates/          # Affiliate System
+│   │   │   ├── notifications/       # Email & Telegram
+│   │   │   └── tickets/             # Support Tickets
+│   │   ├── 📂 services/             # Business Logic
+│   │   │   ├── delivery.service.js  # Auto-Delivery Engine
+│   │   │   ├── payment.service.js   # Payment Processing
+│   │   │   └── telegram.service.js  # Telegram Bot
+│   │   ├── 📂 workers/               # Background Jobs
+│   │   ├── 📂 middlewares/           # Express Middlewares
+│   │   ├── 📂 utils/                # Utilities (encryption, upload...)
+│   │   ├── 📂 webhooks/             # Webhook Handlers
+│   │   ├── app.js                    # Express App
+│   │   └── server.js                 # Server Entry
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   └── package.json
+│
+├── 📂 frontend/                        # React Client
+│   ├── 📂 public/                     # Static Assets
+│   ├── 📂 src/
+│   │   ├── 📂 api/                   # API Client Layer
+│   │   ├── 📂 components/           # UI Components
+│   │   │   ├── admin/               # Admin Components
+│   │   │   ├── layout/              # Layout Components
+│   │   │   └── ui/                  # Base UI Components
+│   │   ├── 📂 context/              # React Contexts
+│   │   ├── 📂 hooks/                # Custom Hooks
+│   │   ├── 📂 pages/                # Page Components
+│   │   │   ├── admin/              # Admin Pages
+│   │   │   └── *.jsx                # Customer Pages
+│   │   ├── 📂 store/                # Zustand Stores
+│   │   ├── 📂 utils/                # Utilities
+│   │   ├── App.jsx                   # Root Component
+│   │   └── main.jsx                  # Entry Point
+│   ├── Dockerfile
+│   ├── package.json
+│   └── vite.config.js
+│
+├── docker-compose.yml                  # Root Docker Config
+└── README.md
+```
+
+---
+
+## Hướng dẫn cài đặt
+
+### Yêu cầu hệ thống
+
+```
+• Node.js 18+
+• PostgreSQL 15+
+• Docker & Docker Compose (optional)
+• npm or yarn
+```
+
+### 1. Cài đặt Backend
 
 ```bash
-# 1. Tạo file env cho backend
-cp backend/.env.example backend/.env
-# Sửa backend/.env: điền JWT_SECRET, ENCRYPTION_KEY (32 ký tự), token telegram, key thanh toán, SMTP...
-# Lưu ý: backend hiện tại sử dụng PostgreSQL. Đặt DB_TYPE=postgres và DATABASE_URL.
+# Di chuyển vào thư mục backend
+cd backend
 
-# 2. (Tùy chọn) tạo .env ở root để đổi VITE_API_URL cho frontend khi deploy production
+# Cài đặt dependencies
+npm install
+
+# Sao chép file môi trường
 cp .env.example .env
 
-# 3. Build & chạy
+# Chỉnh sửa file .env (xem phần cấu hình bên dưới)
+
+# Chạy migrations & tạo database
+npx prisma db push
+
+# Seed dữ liệu mẫu (admin, categories, products)
+npm run seed
+
+# Khởi chạy development server
+npm run dev
+
+# Server chạy tại: http://localhost:5000
+```
+
+### 2. Cài đặt Frontend
+
+```bash
+# Di chuyển vào thư mục frontend
+cd frontend
+
+# Cài đặt dependencies
+npm install
+
+# Sao chép file môi trường
+cp .env.example .env
+
+# Chỉnh sửa: VITE_API_URL=http://localhost:5000/api
+
+# Khởi chạy development server
+npm run dev
+
+# Client chạy tại: http://localhost:5173
+```
+
+### 3. Chạy với Docker (Khuyến nghị cho VPS)
+
+```bash
+# Sao chép và chỉnh sửa file môi trường
+cp backend/.env.example backend/.env
+# Chỉnh sửa: JWT_SECRET, ENCRYPTION_KEY, TELEGRAM_BOT_TOKEN...
+
+# Build và chạy containers
 docker compose up -d --build
 
-# 4. Seed dữ liệu (admin + sản phẩm mẫu)
+# Seed dữ liệu
 docker compose exec backend npm run seed
+
+# Truy cập:
+#   Frontend: http://localhost (hoặc domain của bạn)
+#   Backend:  http://localhost:5000/api
 ```
 
-- Frontend: http://localhost (port 80)
-- Backend API: http://localhost:5000/api
+---
 
-Khi deploy production: trỏ domain frontend vào port 80, và đặt `VITE_API_URL=https://api.yourdomain.com/api` (build lại frontend), `PUBLIC_BASE_URL=https://api.yourdomain.com` trong backend/.env.
+## Cấu hình biến môi trường
+
+### Backend (.env)
+
+```bash
+# ===========================================
+# SERVER CONFIGURATION
+# ===========================================
+NODE_ENV=development
+PORT=5000
+PUBLIC_BASE_URL=http://localhost:5000
+
+# ===========================================
+# DATABASE
+# ===========================================
+DATABASE_URL=postgresql://user:password@localhost:5432/mmo_store
+
+# ===========================================
+# AUTHENTICATION & SECURITY
+# ===========================================
+# JWT Secret - chuỗi ngẫu nhiên dài 32+ ký tự
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+
+# AES-256-GCM Encryption Key - chính xác 32 ký tự
+ENCRYPTION_KEY=32-character-encryption-key!!
+
+# ===========================================
+# TELEGRAM BOT
+# ===========================================
+TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
+TELEGRAM_ADMIN_CHAT_ID=123456789
+TELEGRAM_USE_WEBHOOK=false           # true for production (VPS HTTPS)
+TELEGRAM_WEBHOOK_SECRET=your-webhook-secret
+
+# ===========================================
+# PAYMENT - VIETQR (Casso Integration)
+# ===========================================
+CASSO_API_KEY=your-casso-api-key
+CASSO_WEBHOOK_SECRET=your-casso-webhook-secret
+
+# Thông tin tài khoản ngân hàng (hiển thị trên QR)
+VIETQR_BANK_ID=VPBANK
+VIETQR_BANK_NAME=NGAN HANG TMCP VPBANK
+VIETQR_ACCOUNT_NUMBER=123456789
+VIETQR_ACCOUNT_NAME=CONG TY TNHH MMO STORE
+
+# ===========================================
+# PAYMENT - USDT TRC20
+# ===========================================
+TRONGRID_API_KEY=your-trongrid-api-key
+USDT_WALLET_ADDRESS=TXxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# ===========================================
+# PAYMENT - THE SIEU RE (Card Scratch)
+# ===========================================
+THESIEURE_PARTNER_ID=your-partner-id
+THESIEURE_PARTNER_KEY=your-partner-key
+
+# ===========================================
+# EMAIL (Nodemailer SMTP)
+# ===========================================
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+MAIL_FROM=noreply@mmostore.com
+
+# ===========================================
+# ADMIN ACCOUNT (Created by seed)
+# ===========================================
+ADMIN_EMAIL=admin@mmostore.com
+ADMIN_PASSWORD=AdminPassword123!
+
+# ===========================================
+# ADDITIONAL
+# ===========================================
+# Ngưỡng cảnh báo hết hàng (số lượng)
+LOW_STOCK_THRESHOLD=5
+```
+
+### Frontend (.env)
+
+```bash
+# API Base URL
+VITE_API_URL=http://localhost:5000/api
+
+# Production example:
+# VITE_API_URL=https://api.yourdomain.com/api
+```
 
 ---
 
-## 3. Cấu hình các biến môi trường (backend/.env)
+## Cấu hình Webhook
 
-| Biến | Mô tả |
-| --- | --- |
-| `JWT_SECRET` | Chuỗi ngẫu nhiên dài để ký JWT |
-| `ENCRYPTION_KEY` | **Dùng 32 ký tự** - khóa AES mã hóa dữ liệu giao hàng nhạy cảm |
-| `TELEGRAM_BOT_TOKEN` | Token bot từ @BotFather |
-| `TELEGRAM_ADMIN_CHAT_ID` | Chat ID của admin nhận cảnh báo/báo cáo |
-| `TELEGRAM_USE_WEBHOOK` | `true` cho production (VPS HTTPS), `false` cho dev (polling) |
-| `TELEGRAM_WEBHOOK_SECRET` | Secret bảo vệ endpoint webhook telegram |
-| `TRONGRID_API_KEY` | API key TronGrid (USDT TRC20) |
-| `USDT_WALLET_ADDRESS` | Địa chỉ ví nhận USDT |
-| `BANK_ID` / `BANK_ACCOUNT_NO` / `BANK_ACCOUNT_NAME` | Thông tin tài khoản ngân hàng để sinh VietQR |
-| `CASSO_WEBHOOK_SECRET` | Secure-Token Casso gửi kèm webhook (bắt buộc để verify) |
-| `THESIEURE_PARTNER_ID` / `THESIEURE_PARTNER_KEY` | Key gạch thẻ cào |
-| `SMTP_*` / `MAIL_FROM` | Cấu hình gửi email |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Tài khoản admin tạo bởi seed |
+### Telegram Webhook
 
----
+```bash
+# Khi TELEGRAM_USE_WEBHOOK=true, bot sẽ tự động set webhook tới:
+https://your-domain.com/api/telegram/webhook/YOUR_WEBHOOK_SECRET
 
-## 4. Cấu hình Telegram webhook
+# Đảm bảo:
+# ✓ Domain phải là HTTPS
+# ✓ PUBLIC_BASE_URL đúng trong .env
+```
 
-Khi `TELEGRAM_USE_WEBHOOK=true`, backend tự động gọi `setWebHook` tới:
+### Casso Webhook (VietQR Auto-Check)
 
 ```
-{PUBLIC_BASE_URL}/api/telegram/webhook/{TELEGRAM_WEBHOOK_SECRET}
+1. Đăng ký tài khoản Casso tại: https://casso.vn
+2. Liên kết tài khoản ngân hàng
+3. Tạo webhook trỏ tới:
+   https://your-domain.com/api/payment/casso/webhook
+4. Đặt Secure-Token trùng với CASSO_WEBHOOK_SECRET
+
+# Lưu ý: Mã đơn hàng (orderNumber) phải xuất hiện trong nội dung chuyển khoản
+# Ví dụ: "MMOABC123"
 ```
 
-Đảm bảo `PUBLIC_BASE_URL` là domain HTTPS công khai của VPS. Bot các lệnh: `/start`, `/products`, `/order [id]`, `/status [mã]`, `/aff`, `/help`.
+---
 
-Liên kết tài khoản: user cần có `telegramId` trong DB (admin có thể gán, hoặc mở rộng thêm luồng liên kết qua bot).
+## Luồng thanh toán
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    PAYMENT FLOW DIAGRAM                      │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│   Khách hàng                                                 │
+│       │                                                      │
+│       ▼                                                      │
+│   ┌─────────────────┐                                        │
+│   │  Chọn sản phẩm  │                                       │
+│   └────────┬────────┘                                        │
+│            ▼                                                 │
+│   ┌─────────────────┐                                        │
+│   │    Checkout     │                                        │
+│   └────────┬────────┘                                        │
+│            ▼                                                 │
+│   ┌─────────────────────────────────────┐                   │
+│   │      Phương thức thanh toán         │                   │
+│   ├─────────────┬───────────┬────────────┤                   │
+│   │   VietQR    │   USDT    │  Thẻ cào  │                   │
+│   └──────┬──────┴─────┬────┴─────┬──────┘                   │
+│          │            │           │                           │
+│          ▼            ▼           ▼                           │
+│   ┌──────────┐  ┌──────────┐  ┌──────────┐                  │
+│   │  Bank    │  │ TronGrid │  │TheSieuRe │                  │
+│   │ Transfer │  │  Verify  │  │   API    │                  │
+│   └────┬─────┘  └────┬─────┘  └────┬─────┘                  │
+│        │              │             │                         │
+│        ▼              ▼             ▼                         │
+│   ┌─────────────────────────────────────────┐               │
+│   │          ORDER CONFIRMED                 │               │
+│   └──────────────────┬──────────────────────┘               │
+│                      ▼                                        │
+│   ┌─────────────────────────────────────────┐               │
+│   │           AUTO DELIVERY                 │               │
+│   │  • License Key / Account Credentials    │               │
+│   │  • Encrypted with AES-256-GCM           │               │
+│   │  • Sent via Email + Telegram            │               │
+│   └─────────────────────────────────────────┘               │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 5. Cấu hình webhook Casso (VietQR auto-check)
+## Đăng nhập mặc định
 
-1. Đăng ký tài khoản **Casso**, liên kết ngân hàng.
-2. Tạo webhook trỏ tới: `https://api.yourdomain.com/api/payment/casso/webhook`
-3. Đặt **Secure-Token** trùng với `CASSO_WEBHOOK_SECRET` trong `.env`.
-4. Khi khách chuyển khoản với nội dung chứa **mã đơn** (vd `MMOABC123`), Casso gửi webhook, hệ thống tự đối chiếu và giao hàng.
+```
+🔐 Admin Credentials (sau khi chạy seed)
 
----
+Email:    admin@mmostore.com
+Password: AdminPassword123!
 
-## 6. Luồng thanh toán
-
-- **Số dư:** trừ trực tiếp, giao hàng ngay.
-- **VietQR/Bank:** hiện QR -> khách CK nội dung = mã đơn -> Casso webhook -> auto giao. (Hoặc admin bấm "Xác nhận".)
-- **USDT TRC20:** khách chuyển đúng số tiền -> bấm "kiểm tra" hoặc hệ thống đối chiếu TronGrid -> auto giao.
-- **Thẻ cào:** nhập mã+serial -> gạch qua TheSieuRe (thiếu key thì admin xác nhận thủ công).
+⚠️  THAY ĐỔI PASSWORD NGAY SAU KHI ĐĂNG NHẬP LẦN ĐẦU!
+```
 
 ---
 
-## Ghi chú
+## Bảo mật
 
-- Đây là nền tảng đầy đủ, có thể mở rộng thêm (ví dụ: luồng liên kết Telegram tự động, thêm cổng thanh toán, giỏ hàng nhiều sản phẩm).
-- **Nhớ đổi tất cả secret mặc định trước khi lên production.**
+```
+┌────────────────────────────────────────────────────────────┐
+│  🔒 SECURITY FEATURES                                     │
+├────────────────────────────────────────────────────────────┤
+│  ✓ Secrets trong .env (không commit)                      │
+│  ✓ Webhook signatures verification                        │
+│  ✓ AES-256-GCM encryption cho dữ liệu nhạy cảm           │
+│  ✓ bcrypt password hashing (cost factor 12)               │
+│  ✓ JWT tokens với expiry                                 │
+│  ✓ Rate limiting (Brute force protection)                │
+│  ✓ Helmet.js security headers                            │
+│  ✓ CORS configuration                                    │
+│  ✓ Input validation & sanitization                       │
+└────────────────────────────────────────────────────────────┘
+
+⚠️  NHỚ ĐỔI TẤT CẢ SECRETS TRƯỚC KHI DEPLOY PRODUCTION!
+```
+
+---
+
+## Scripts hữu ích
+
+```bash
+# Backend
+npm run dev          # Development server
+npm run build        # Production build
+npm run seed         # Seed database
+npm run db:push      # Push schema to DB
+npm run db:migrate   # Run migrations
+npm run db:studio    # Open Prisma Studio
+
+# Frontend
+npm run dev          # Development server
+npm run build        # Production build
+npm run preview      # Preview production build
+npm run lint         # ESLint check
+```
+
+---
+
+## License
+
+```
+© 2024 MMO-Store Premium
+All Rights Reserved
+
+This is proprietary software. Redistribution is not permitted.
+```
+
+---
+
+<div align="center">
+
+```
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║     ███╗   ███╗██╗███████╗███████╗██╗ ██████╗ ███╗   ██╗ ║
+║     ████╗ ████║██║██╔════╝██╔════╝██║██╔═══██╗████╗  ██║ ║
+║     ██╔████╔██║██║███████╗███████╗██║██║   ██║██╔██╗ ██║ ║
+║     ██║╚██╔╝██║██║╚════██║╚════██║██║██║   ██║██║╚██╗██║ ║
+║     ██║ ╚═╝ ██║██║███████║███████║██║╚██████╔╝██║ ╚████║ ║
+║     ╚═╝     ╚═╝╚═╝╚══════╝╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ║
+║                                                           ║
+║     ███████╗██╗   ██╗██████╗ ███████╗██████╗ ███████╗███╗  ║
+║     ██╔════╝██║   ██║██╔══██╗██╔════╝██╔══██╗██╔════╝████╗ ║
+║     ███████╗██║   ██║██████╔╝█████╗  ██████╔╝█████╗  ██╔██╗║
+║     ╚════██║██║   ██║██╔═══╝ ██╔══╝  ██╔══██╗██╔══╝  ██║╚██║║
+║     ███████║╚██████╔╝██║     ███████╗██║  ██║███████╗██║ ╚██║║
+║     ╚══════╝ ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝║
+║                                                           ║
+║                    Premium Edition                         ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+```
+
+**Build with** :heart: **by MMO-Store Team**
+
+</div>

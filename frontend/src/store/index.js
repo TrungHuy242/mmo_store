@@ -1,340 +1,226 @@
-/**
- * Zustand Store - Authentication
- * Handles login, registration, user state, JWT tokens
- */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { immer } from 'zustand/middleware/immer';
-import { devtools } from 'zustand/middleware';
-import { authService } from '../services/auth.service';
+
+export const useCartStore = create(
+  persist(
+    (set, get) => ({
+      items: [],
+
+      // Bulk discount tiers configuration (same as ProductDetail)
+      getBulkDiscount: (qty) => {
+        if (qty >= 10) return 10;
+        if (qty >= 5) return 5;
+        return 0;
+      },
+
+      addItem: (product, quantity = 1, bulkDiscount = 0) => {
+        const items = get().items;
+        const existingIndex = items.findIndex(item => item.id === product.id);
+        
+        if (existingIndex > -1) {
+          const newItems = [...items];
+          newItems[existingIndex].quantity += quantity;
+          // Recalculate bulk discount based on new total quantity
+          newItems[existingIndex].bulkDiscount = get().getBulkDiscount(newItems[existingIndex].quantity);
+          set({ items: newItems });
+        } else {
+          const itemWithDiscount = { ...product, quantity, bulkDiscount };
+          set({ items: [...items, itemWithDiscount] });
+        }
+      },
+      
+      removeItem: (id) => {
+        set({ items: get().items.filter(item => item.id !== id) });
+      },
+      
+      updateQuantity: (id, quantity) => {
+        if (quantity < 1) {
+          get().removeItem(id);
+          return;
+        }
+        const newItems = get().items.map(item =>
+          item.id === id ? { ...item, quantity } : item
+        );
+        set({ items: newItems });
+      },
+      
+      clearCart: () => {
+        set({ items: [] });
+      },
+      
+      getTotal: () => {
+        return get().items.reduce(
+          (sum, item) => sum + (item.price || 0) * item.quantity,
+          0
+        );
+      },
+      
+      getItemCount: () => {
+        return get().items.reduce((sum, item) => sum + item.quantity, 0);
+      },
+      
+      // Validate and sync stock with server
+      validateStock: async (toast) => {
+        const items = get().items;
+        if (items.length === 0) return { valid: true, updated: false };
+        
+        try {
+          const response = await fetch('/api/products/stock-check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              items: items.map(item => ({
+                productId: item.id,
+                quantity: item.quantity || 1,
+              })),
+            }),
+          });
+          
+          const result = await response.json();
+          if (!result.success) return { valid: true, updated: false };
+          
+          const stockResults = result.data || [];
+          let hasChanges = false;
+          const newItems = [...items];
+          
+          for (const stockInfo of stockResults) {
+            const cartIndex = newItems.findIndex(item => item.id === stockInfo.productId);
+            if (cartIndex === -1) continue;
+            
+            // Product not found or inactive - remove from cart
+            if (!stockInfo.available && stockInfo.reason !== 'INSUFFICIENT_STOCK') {
+              const productName = stockInfo.productName || newItems[cartIndex].name || 'Sản phẩm';
+              const message = stockInfo.message || 'Sản phẩm không khả dụng';
+              
+              toast?.(`${productName}: ${message}`);
+              toast?.(`${productName} đã được xóa khỏi giỏ hàng`, { icon: '🛒' });
+              
+              newItems.splice(cartIndex, 1);
+              hasChanges = true;
+            }
+            // Insufficient stock - update quantity
+            else if (stockInfo.warning && stockInfo.maxQuantity > 0) {
+              const productName = stockInfo.productName || newItems[cartIndex].name || 'Sản phẩm';
+              const currentQty = newItems[cartIndex].quantity || 1;
+              
+              newItems[cartIndex].quantity = stockInfo.maxQuantity;
+              hasChanges = true;
+              
+              toast?.(`${productName} đã tự động cập nhật số lượng do kho hàng không đủ.`, { icon: '⚠️' });
+            }
+          }
+          
+          if (hasChanges) {
+            set({ items: newItems });
+          }
+          
+          return {
+            valid: newItems.length > 0,
+            updated: hasChanges,
+            items: newItems,
+          };
+        } catch (error) {
+          console.error('Stock validation error:', error);
+          return { valid: true, updated: false };
+        }
+      },
+    }),
+    {
+      name: 'mmo-cart-storage',
+    }
+  )
+);
+
+export const useWishlistStore = create(
+  persist(
+    (set, get) => ({
+      items: [],
+      loading: false,
+      
+      setItems: (items) => {
+        set({ items: Array.isArray(items) ? items : [] });
+      },
+      
+      addItem: (productId) => {
+        if (!get().items.includes(productId)) {
+          set({ items: [...get().items, productId] });
+        }
+      },
+      
+      removeItem: (productId) => {
+        set({ items: get().items.filter(id => id !== productId) });
+      },
+      
+      toggleItem: (productId) => {
+        const items = get().items;
+        if (items.includes(productId)) {
+          set({ items: items.filter(id => id !== productId) });
+        } else {
+          set({ items: [...items, productId] });
+        }
+      },
+      
+      isInWishlist: (productId) => {
+        return get().items.includes(productId);
+      },
+      
+      clearWishlist: () => {
+        set({ items: [] });
+      },
+      
+      setLoading: (loading) => {
+        set({ loading });
+      },
+      
+      getCount: () => {
+        return get().items.length;
+      },
+    }),
+    {
+      name: 'mmo-wishlist-storage',
+    }
+  )
+);
+
+export const useUIStore = create((set) => ({
+  sidebarOpen: false,
+  commandPaletteOpen: false,
+  theme: 'dark',
+  
+  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+  setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  
+  toggleCommandPalette: () => set((state) => ({ commandPaletteOpen: !state.commandPaletteOpen })),
+  setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
+  
+  setTheme: (theme) => set({ theme }),
+  toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
+}));
 
 export const useAuthStore = create(
   persist(
-    devtools(
-      immer((set, get) => ({
-        // State
-        user: null,
-        token: null,
-        refreshToken: null,
-        isLoading: false,
-        error: null,
-        isAuthenticated: false,
-
-        // Login
-        login: async (email, password) => {
-          set((state) => {
-            state.isLoading = true;
-            state.error = null;
-          });
-          try {
-            const { user, token, refreshToken } = await authService.login(
-              email,
-              password
-            );
-            set((state) => {
-              state.user = user;
-              state.token = token;
-              state.refreshToken = refreshToken;
-              state.isAuthenticated = true;
-              state.isLoading = false;
-            });
-            return user;
-          } catch (err) {
-            set((state) => {
-              state.error = err.message || 'Login failed';
-              state.isLoading = false;
-            });
-            throw err;
-          }
-        },
-
-        // Register
-        register: async (email, password, name) => {
-          set((state) => {
-            state.isLoading = true;
-            state.error = null;
-          });
-          try {
-            const { user, token, refreshToken } = await authService.register(
-              { email, password, name }
-            );
-            set((state) => {
-              state.user = user;
-              state.token = token;
-              state.refreshToken = refreshToken;
-              state.isAuthenticated = true;
-              state.isLoading = false;
-            });
-            return user;
-          } catch (err) {
-            set((state) => {
-              state.error = err.message || 'Registration failed';
-              state.isLoading = false;
-            });
-            throw err;
-          }
-        },
-
-        // Logout
-        logout: () => {
-          set((state) => {
-            state.user = null;
-            state.token = null;
-            state.refreshToken = null;
-            state.isAuthenticated = false;
-          });
-        },
-
-        // Refresh user data
-        refreshUser: async () => {
-          try {
-            const user = await authService.getMe();
-            set((state) => {
-              state.user = user;
-            });
-          } catch (err) {
-            set((state) => {
-              state.user = null;
-              state.isAuthenticated = false;
-            });
-          }
-        },
-
-        // Clear error
-        clearError: () =>
-          set((state) => {
-            state.error = null;
-          }),
-      })),
-      { name: 'auth-store' }
-    ),
+    (set, get) => ({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      
+      login: (userData, token) => {
+        set({ user: userData, token, isAuthenticated: true });
+      },
+      
+      logout: () => {
+        set({ user: null, token: null, isAuthenticated: false });
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+      },
+      
+      updateUser: (userData) => {
+        set({ user: { ...get().user, ...userData } });
+      },
+    }),
     {
-      name: 'auth-persist',
-      partialize: (state) => ({
-        token: state.token,
-        refreshToken: state.refreshToken,
-        user: state.user,
-      }),
+      name: 'mmo-auth-storage',
+      partialize: (state) => ({ user: state.user, token: state.token, isAuthenticated: state.isAuthenticated }),
     }
   )
-);
-
-/**
- * Zustand Store - Cart
- * Handles shopping cart state, persist to localStorage
- */
-export const useCartStore = create(
-  persist(
-    devtools(
-      immer((set, get) => ({
-        items: [],
-        coupon: null,
-        shippingMethod: 'instant',
-
-        // Add to cart
-        addItem: (product, quantity = 1) => {
-          set((state) => {
-            const existing = state.items.find((i) => i.id === product.id);
-            if (existing) {
-              existing.quantity += quantity;
-            } else {
-              state.items.push({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: product.image,
-                quantity,
-              });
-            }
-          });
-        },
-
-        // Remove from cart
-        removeItem: (productId) => {
-          set((state) => {
-            state.items = state.items.filter((i) => i.id !== productId);
-          });
-        },
-
-        // Update quantity
-        updateQuantity: (productId, quantity) => {
-          set((state) => {
-            const item = state.items.find((i) => i.id === productId);
-            if (item) {
-              if (quantity <= 0) {
-                state.items = state.items.filter((i) => i.id !== productId);
-              } else {
-                item.quantity = quantity;
-              }
-            }
-          });
-        },
-
-        // Clear cart
-        clear: () => {
-          set((state) => {
-            state.items = [];
-            state.coupon = null;
-          });
-        },
-
-        // Computed
-        get subtotal() {
-          return get().items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        },
-
-        get total() {
-          const subtotal = get().subtotal;
-          return subtotal; // Add tax/shipping as needed
-        },
-
-        get itemCount() {
-          return get().items.reduce((sum, item) => sum + item.quantity, 0);
-        },
-      })),
-      { name: 'cart-store' }
-    ),
-    {
-      name: 'cart-persist',
-    }
-  )
-);
-
-/**
- * Zustand Store - Theme
- */
-export const useThemeStore = create(
-  persist(
-    devtools((set) => ({
-      isDark: true,
-      toggleTheme: () =>
-        set((state) => ({
-          isDark: !state.isDark,
-        })),
-      setTheme: (isDark) =>
-        set({
-          isDark,
-        }),
-    })),
-    {
-      name: 'theme-persist',
-    }
-  )
-);
-
-/**
- * Zustand Store - Product Data
- */
-export const useProductStore = create(
-  devtools((set, get) => ({
-    products: [],
-    categories: [],
-    selectedCategory: null,
-    searchQuery: '',
-    isLoading: false,
-    error: null,
-
-    setProducts: (products) =>
-      set(() => ({
-        products,
-      })),
-
-    setCategories: (categories) =>
-      set(() => ({
-        categories,
-      })),
-
-    setSelectedCategory: (categoryId) =>
-      set(() => ({
-        selectedCategory: categoryId,
-      })),
-
-    setSearchQuery: (query) =>
-      set(() => ({
-        searchQuery: query,
-      })),
-
-    setIsLoading: (isLoading) =>
-      set(() => ({
-        isLoading,
-      })),
-
-    setError: (error) =>
-      set(() => ({
-        error,
-      })),
-
-    // Computed filtered products
-    get filteredProducts() {
-      let filtered = get().products;
-
-      if (get().selectedCategory) {
-        filtered = filtered.filter(
-          (p) => p.categoryId === get().selectedCategory
-        );
-      }
-
-      if (get().searchQuery) {
-        const query = get().searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (p) =>
-            p.name.toLowerCase().includes(query) ||
-            p.description.toLowerCase().includes(query)
-        );
-      }
-
-      return filtered;
-    },
-  })),
-  { name: 'product-store' }
-);
-
-/**
- * Zustand Store - Admin
- */
-export const useAdminStore = create(
-  devtools((set) => ({
-    stats: {
-      totalRevenue: 0,
-      totalOrders: 0,
-      totalUsers: 0,
-      activeProducts: 0,
-    },
-    orders: [],
-    users: [],
-    isLoading: false,
-    selectedOrder: null,
-    selectedUser: null,
-
-    setStats: (stats) =>
-      set(() => ({
-        stats,
-      })),
-
-    setOrders: (orders) =>
-      set(() => ({
-        orders,
-      })),
-
-    setUsers: (users) =>
-      set(() => ({
-        users,
-      })),
-
-    setIsLoading: (isLoading) =>
-      set(() => ({
-        isLoading,
-      })),
-
-    setSelectedOrder: (order) =>
-      set(() => ({
-        selectedOrder: order,
-      })),
-
-    setSelectedUser: (user) =>
-      set(() => ({
-        selectedUser: user,
-      })),
-  })),
-  { name: 'admin-store' }
 );

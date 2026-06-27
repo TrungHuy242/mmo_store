@@ -1,16 +1,24 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar.jsx';
 import CartDrawer from './sections/CartDrawer.jsx';
+import { useCartStore } from '../store';
 import { Toaster } from 'react-hot-toast';
 
 export default function Layout({ children }) {
+  const navigate = useNavigate();
   const [cartOpen, setCartOpen] = useState(false);
-  const [cartItems] = useState([]);
+  const items = useCartStore((state) => state.items);
+
+  const handleCheckout = () => {
+    setCartOpen(false);
+    navigate('/cart-checkout');
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar onCartClick={() => setCartOpen(true)} cartCount={cartItems.length} />
-      <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <Navbar onCartClick={() => setCartOpen(true)} cartCount={items.length} />
+      <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} onCheckout={handleCheckout} />
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6">
         {children}
       </main>
@@ -51,15 +59,9 @@ export default function Layout({ children }) {
               <div className="w-10 h-7 bg-red-500 rounded flex items-center justify-center">
                 <span className="text-white text-xs font-bold">MC</span>
               </div>
-              {/* Bank Transfer */}
-              <div className="w-10 h-7 bg-green-600 rounded flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              {/* USDT */}
-              <div className="w-10 h-7 bg-green-500 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold">₮</span>
+              {/* Balance */}
+              <div className="w-10 h-7 bg-neon-cyan/20 rounded flex items-center justify-center">
+                <span className="text-neon-cyan text-xs font-bold">VNĐ</span>
               </div>
             </div>
           </div>

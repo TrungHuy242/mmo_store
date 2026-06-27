@@ -8,6 +8,9 @@ node_modules/
 backend/.env
 frontend/.env
 
+# Local MCP config (may contain personal API keys)
+mcp.json
+
 # Build output
 dist/
 build/
