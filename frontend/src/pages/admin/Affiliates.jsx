@@ -18,14 +18,35 @@ export default function AdminAffiliates() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [affRes, withRes] = await Promise.all([
+      // Use Promise.allSettled so a single failing endpoint (e.g. backend
+      // restart or missing route) does not prevent the other list from
+      // rendering. Previously Promise.all would reject on the first 404 and
+      // both tables ended up empty even when only one route was broken.
+      const responses = await Promise.allSettled([
         adminApi.getAffiliates({ limit: 50 }),
-        adminApi.getWithdrawals(),
+        adminApi.getWithdrawals('pending'),
       ]);
-      setAffiliates(affRes.data?.data || affRes.data || []);
-      setWithdrawals(withRes.data?.data || withRes.data || []);
+
+      const [affResult, withResult] = responses;
+      if (affResult.status === 'fulfilled') {
+        const affRes = affResult.value;
+        setAffiliates(affRes.data?.data || affRes.data || []);
+      } else {
+        console.error('Affiliates load failed:', affResult.reason);
+        setAffiliates([]);
+        toast.error(t('admin.load_affiliates_failed', 'Không thể tải danh sách cộng tác viên'));
+      }
+
+      if (withResult.status === 'fulfilled') {
+        const withRes = withResult.value;
+        setWithdrawals(withRes.data?.data || withRes.data || []);
+      } else {
+        console.error('Withdrawals load failed:', withResult.reason);
+        setWithdrawals([]);
+        toast.error(t('admin.load_withdrawals_failed', 'Không thể tải yêu cầu rút tiền'));
+      }
     } catch (err) {
-      console.error('Failed to load affiliates:', err);
+      console.error('Failed to load affiliate data:', err);
       toast.error(t('common.error'));
     } finally {
       setLoading(false);
