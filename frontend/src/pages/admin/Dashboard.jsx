@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
@@ -85,15 +86,34 @@ const formatDayLabel = (dateStr) => {
 export default function AdminDashboard() {
   const { t } = useTranslation();
 
-  const fetchers = [
-    () => adminApi.getDashboardStats(),
-    () => adminApi.getRecentOrders(5),
-    () => adminApi.getTopProducts(5),
-    () => adminApi.getRevenueSeries('month'),
-  ];
+  // Build fetchers once via useMemo so the array reference is stable across
+  // renders. Passing a new array each render would re-trigger the hook's
+  // effect, even though the hook now tolerates it via a ref.
+  const fetchers = useMemo(
+    () => [
+      () => adminApi.getDashboardStats(),
+      () => adminApi.getRecentOrders(5),
+      () => adminApi.getTopProducts(5),
+      () => adminApi.getRevenueSeries('month'),
+    ],
+    []
+  );
 
   const { results, reload } = useParallelData(fetchers);
   const [statsRes, recentOrdersRes, topProductsRes, revenueRes] = results;
+
+  // Surface a single toast when any of the parallel requests fails; using
+  // a ref so the toast doesn't fire on every render.
+  const lastErrorRef = useRef(null);
+  useEffect(() => {
+    const errResult = results.find((r) => r.error);
+    if (errResult && errResult.error !== lastErrorRef.current) {
+      lastErrorRef.current = errResult.error;
+      toast.error(t('admin.load_dashboard_failed', 'Không thể tải dashboard'));
+    } else if (!errResult) {
+      lastErrorRef.current = null;
+    }
+  }, [results, t]);
 
   const statsData = statsRes.data || {};
   const recentOrders = Array.isArray(recentOrdersRes.data) ? recentOrdersRes.data : [];
@@ -110,10 +130,6 @@ export default function AdminDashboard() {
   }));
 
   const isLoading = results.some((r) => r.loading);
-  const hasError = results.find((r) => r.error);
-  if (hasError) {
-    toast.error(t('admin.load_dashboard_failed', 'Không thể tải dashboard'));
-  }
 
   const totalRevenue = Number(statsData.totalRevenue || 0);
   const totalOrders = Number(statsData.totalOrders || 0);
