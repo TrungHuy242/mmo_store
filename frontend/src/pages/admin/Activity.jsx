@@ -156,11 +156,12 @@ export default function ActivityIcon() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Nhật ký hoạt động</h1>
-          <p className="text-gray-400 text-sm mt-1">Theo dõi các thao tác của quản trị viên</p>
+          <p className="text-gray-300 text-sm mt-1">Theo dõi các thao tác của quản trị viên</p>
         </div>
-        <button 
+        <button
           onClick={() => loadLogs()}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+          aria-label="Làm mới nhật ký"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Làm mới

@@ -75,10 +75,10 @@ export default function AdminAffiliates() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">{t('admin.affiliates')}</h1>
-          <p className="text-gray-400 text-sm mt-1">{t('admin.manage_affiliates')}</p>
+          <p className="text-gray-300 text-sm mt-1">{t('admin.manage_affiliates')}</p>
         </div>
-        <button onClick={() => loadData()} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors">
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+        <button onClick={() => loadData()} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors" aria-label="Làm mới">
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
         </button>
       </div>
 
@@ -96,7 +96,7 @@ export default function AdminAffiliates() {
                 <stat.icon className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">{t(stat.labelKey)}</p>
+                <p className="text-sm text-gray-300">{t(stat.labelKey)}</p>
                 <p className="text-2xl font-bold">{loading ? '...' : stat.value.toLocaleString('vi-VN')}₫</p>
               </div>
             </div>
@@ -106,12 +106,12 @@ export default function AdminAffiliates() {
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
         className="bg-[#111827] rounded-2xl border border-white/5 p-6">
-        <h3 className="font-semibold mb-2">{t('admin.referral_link')}</h3>
-        <p className="text-sm text-gray-400 mb-4">{t('admin.share_earn_commission')}</p>
+        <h2 className="text-base font-semibold mb-2">{t('admin.referral_link')}</h2>
+        <p className="text-sm text-gray-300 mb-4">{t('admin.share_earn_commission')}</p>
         <div className="flex gap-3">
-          <input readOnly value={baseUrl + '/register?ref=YOUR_CODE'} className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-mono" />
-          <button onClick={copyLink} className={`px-6 py-3 rounded-xl font-medium transition-colors ${copied ? 'bg-green-500 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}>
-            {copied ? <CheckCircle className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+          <input readOnly value={baseUrl + '/register?ref=YOUR_CODE'} className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-mono" aria-label="Link giới thiệu" />
+          <button onClick={copyLink} className={`px-6 py-3 rounded-xl font-medium transition-colors ${copied ? 'bg-green-500 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`} aria-label="Sao chép link giới thiệu">
+            {copied ? <CheckCircle className="w-5 h-5" aria-hidden="true" /> : <Copy className="w-5 h-5" aria-hidden="true" />}
           </button>
         </div>
       </motion.div>
@@ -134,27 +134,27 @@ export default function AdminAffiliates() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead><tr className="border-b border-white/5">
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.affiliate')}</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.referrals')}</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.earnings')}</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.status')}</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Ngày tham gia</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.affiliate')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.referrals')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.earnings')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.status')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Ngày tham gia</th>
               </tr></thead>
               <tbody className="divide-y divide-white/5">
                 {loading ? (
-                  <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-500">Đang tải...</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-300">Đang tải...</td></tr>
                 ) : affiliates.length === 0 ? (
-                  <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-500">Chưa có cộng tác viên nào</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-300">Chưa có cộng tác viên nào</td></tr>
                 ) : affiliates.map((aff) => (
                   <tr key={aff.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold" aria-hidden="true">
                           {aff.fullName?.charAt(0) || aff.email?.charAt(0) || 'U'}
                         </div>
                         <div>
                           <p className="font-medium">{aff.fullName || aff.email}</p>
-                          <p className="text-xs text-gray-500">{aff.email}</p>
+                          <p className="text-xs text-gray-300">{aff.email}</p>
                         </div>
                       </div>
                     </td>
@@ -165,7 +165,7 @@ export default function AdminAffiliates() {
                         {aff.affiliateStatus || 'pending'}
                       </span>
                     </td>
-                    <td className="px-4 py-4"><span className="text-xs text-gray-500">{aff.createdAt ? new Date(aff.createdAt).toLocaleDateString('vi-VN') : '—'}</span></td>
+                    <td className="px-4 py-4"><span className="text-xs text-gray-300">{aff.createdAt ? new Date(aff.createdAt).toLocaleDateString('vi-VN') : '—'}</span></td>
                   </tr>
                 ))}
               </tbody>
@@ -178,24 +178,24 @@ export default function AdminAffiliates() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead><tr className="border-b border-white/5">
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Cộng tác viên</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Số tiền</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Ngày yêu cầu</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.status')}</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">{t('admin.actions')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Cộng tác viên</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Số tiền</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Ngày yêu cầu</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.status')}</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase">{t('admin.actions')}</th>
               </tr></thead>
               <tbody className="divide-y divide-white/5">
                 {loading ? (
-                  <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-500">Đang tải...</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-300">Đang tải...</td></tr>
                 ) : withdrawals.length === 0 ? (
-                  <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-500">Không có yêu cầu rút tiền nào</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-300">Không có yêu cầu rút tiền nào</td></tr>
                 ) : withdrawals.map((w) => (
                   <tr key={w.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-4 py-4">
                       <p className="font-medium">{w.user?.fullName || w.user?.email || '—'}</p>
                     </td>
                     <td className="px-4 py-4"><span className="text-amber-400 font-medium">{Number(w.amount || 0).toLocaleString('vi-VN')}₫</span></td>
-                    <td className="px-4 py-4"><span className="text-xs text-gray-500">{w.createdAt ? new Date(w.createdAt).toLocaleString('vi-VN') : '—'}</span></td>
+                    <td className="px-4 py-4"><span className="text-xs text-gray-300">{w.createdAt ? new Date(w.createdAt).toLocaleString('vi-VN') : '—'}</span></td>
                     <td className="px-4 py-4">
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         w.status === 'approved' ? 'bg-green-500/10 text-green-400' :

@@ -85,17 +85,19 @@ function MaskedValue({ value }) {
       <span className="font-mono text-sm text-gray-300">{display || '—'}</span>
       <button
         onClick={() => setVisible((v) => !v)}
-        className="p-1 rounded hover:bg-white/10 text-gray-500 hover:text-gray-300 transition-colors"
+        className="p-1 rounded hover:bg-white/10 text-gray-400 hover:text-gray-200 transition-colors"
         title={visible ? 'Ẩn' : 'Hiện'}
+        aria-label={visible ? 'Ẩn giá trị' : 'Hiện giá trị'}
       >
-        {visible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+        {visible ? <EyeOff className="w-3.5 h-3.5" aria-hidden="true" /> : <Eye className="w-3.5 h-3.5" aria-hidden="true" />}
       </button>
       <button
         onClick={handleCopy}
-        className="p-1 rounded hover:bg-white/10 text-gray-500 hover:text-green-400 transition-colors"
+        className="p-1 rounded hover:bg-white/10 text-gray-400 hover:text-green-400 transition-colors"
         title="Copy"
+        aria-label="Sao chép giá trị"
       >
-        {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+        {copied ? <Check className="w-3.5 h-3.5 text-green-400" aria-hidden="true" /> : <Copy className="w-3.5 h-3.5" aria-hidden="true" />}
       </button>
     </div>
   );
@@ -144,10 +146,10 @@ function BulkAddModal({ product, onClose, onSuccess }) {
       <div className="flex items-start justify-between -mt-2 mb-4">
         <div>
           <h2 className="text-lg font-bold flex items-center gap-2">
-            <Upload className="w-5 h-5 text-blue-400" />
+            <Upload className="w-5 h-5 text-blue-400" aria-hidden="true" />
             Nạp hàng hàng loạt
           </h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-gray-300 mt-1">
             Sản phẩm: <span className="text-white font-medium">{product?.name}</span>
           </p>
         </div>
@@ -156,7 +158,7 @@ function BulkAddModal({ product, onClose, onSuccess }) {
       <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
         {/* Type selector */}
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-3">Loại hàng</label>
+          <label className="block text-sm font-medium text-gray-300 mb-3">Loại hàng</label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {ITEM_TYPES.map((itemType) => (
               <button
@@ -178,8 +180,8 @@ function BulkAddModal({ product, onClose, onSuccess }) {
         {/* Textarea */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium text-gray-400">
-              Danh sách items <span className="text-gray-600">(mỗi dòng = 1 item)</span>
+            <label className="text-sm font-medium text-gray-300">
+              Danh sách items <span className="text-gray-500">(mỗi dòng = 1 item)</span>
             </label>
             {lines.length > 0 && (
               <div className="flex items-center gap-2 text-xs">
@@ -206,18 +208,18 @@ function BulkAddModal({ product, onClose, onSuccess }) {
         {/* Preview */}
         {uniqueLines.length > 0 && (
           <div>
-            <p className="text-xs text-gray-500 mb-2 font-medium">Preview (5 items đầu):</p>
+            <p className="text-xs text-gray-300 mb-2 font-medium">Preview (5 items đầu):</p>
             <div className="bg-[#060d1f] rounded-xl p-3 border border-white/5 space-y-1.5">
               {uniqueLines.slice(0, 5).map((line, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <span className="text-xs text-gray-600 w-5 text-right shrink-0">{i + 1}.</span>
+                  <span className="text-xs text-gray-400 w-5 text-right shrink-0">{i + 1}.</span>
                   <span className="text-xs font-mono text-green-400 truncate">
                     {line.length > 50 ? `${line.substring(0, 50)}...` : line}
                   </span>
                 </div>
               ))}
               {uniqueLines.length > 5 && (
-                <p className="text-xs text-gray-500 pl-7">... và {uniqueLines.length - 5} items khác</p>
+                <p className="text-xs text-gray-300 pl-7">... và {uniqueLines.length - 5} items khác</p>
               )}
             </div>
           </div>
@@ -225,8 +227,8 @@ function BulkAddModal({ product, onClose, onSuccess }) {
 
         {/* Warning */}
         <div className="flex items-start gap-3 p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
-          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-          <div className="text-xs text-amber-400/80 space-y-0.5">
+          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" aria-hidden="true" />
+          <div className="text-xs text-amber-300 space-y-0.5">
             <p>Items trùng lặp trong danh sách sẽ bị loại bỏ tự động.</p>
             <p>Đảm bảo không có khoảng trắng thừa đầu/cuối dòng.</p>
           </div>
@@ -395,23 +397,25 @@ export default function AdminInventory() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Quản lý Kho hàng</h1>
-          <p className="text-gray-400 text-sm mt-1">Nạp hàng và theo dõi tồn kho theo sản phẩm</p>
+          <p className="text-gray-300 text-sm mt-1">Nạp hàng và theo dõi tồn kho theo sản phẩm</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => { reloadInventory(); reloadStats(); }}
             disabled={!selectedProductId}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors disabled:opacity-50"
+            aria-label="Làm mới kho"
           >
-            <RefreshCw className={`w-4 h-4 ${loadingInventory ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loadingInventory ? 'animate-spin' : ''}`} aria-hidden="true" />
             Làm mới
           </button>
           <button
             onClick={() => setShowBulkAdd(true)}
             disabled={!selectedProduct}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Mở nạp hàng hàng loạt"
           >
-            <Upload className="w-4 h-4" />
+            <Upload className="w-4 h-4" aria-hidden="true" />
             Nạp hàng hàng loạt
           </button>
         </div>
@@ -423,7 +427,7 @@ export default function AdminInventory() {
         animate={{ opacity: 1, y: 0 }}
         className="bg-[#111827] rounded-2xl border border-white/5 p-4"
       >
-        <label className="block text-sm font-medium text-gray-400 mb-2">Chọn sản phẩm để xem kho</label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">Chọn sản phẩm để xem kho</label>
         {loadingProducts ? (
           <div className="h-10 bg-white/5 rounded-xl animate-pulse" />
         ) : (
@@ -466,7 +470,7 @@ export default function AdminInventory() {
                   <p className={`text-3xl font-bold mt-4 ${card.cls}`}>
                     {card.isText ? card.value : Number(card.value).toLocaleString()}
                   </p>
-                  <p className="text-sm text-gray-400 mt-1">{card.label}</p>
+                  <p className="text-sm text-gray-300 mt-1">{card.label}</p>
                 </>
               )}
             </motion.div>
@@ -484,7 +488,7 @@ export default function AdminInventory() {
         {/* Table Header / Filters */}
         <div className="p-4 border-b border-white/5 flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
             <input
               type="text"
               placeholder="Tìm kiếm item..."
@@ -502,7 +506,7 @@ export default function AdminInventory() {
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>
-          <span className="px-4 py-2.5 text-sm text-gray-400 bg-white/5 rounded-xl border border-white/5 whitespace-nowrap">
+          <span className="px-4 py-2.5 text-sm text-gray-300 bg-white/5 rounded-xl border border-white/5 whitespace-nowrap">
             {pagination?.total ?? items.length} items
           </span>
         </div>
@@ -512,12 +516,12 @@ export default function AdminInventory() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-white/5">
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase w-10">#</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Loại</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Giá trị</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Trạng thái</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Ngày thêm</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">Hành động</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase w-10">#</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Loại</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Giá trị</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Trạng thái</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Ngày thêm</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase">Hành động</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -525,22 +529,22 @@ export default function AdminInventory() {
                 [...Array(5)].map((_, i) => <SkeletonRow key={i} />)
               ) : !selectedProductId ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
-                    <User className="w-10 h-10 mx-auto opacity-30 mb-2" />
+                  <td colSpan={6} className="px-4 py-12 text-center text-gray-400">
+                    <User className="w-10 h-10 mx-auto opacity-30 mb-2" aria-hidden="true" />
                     <p>Chọn sản phẩm để xem kho</p>
                   </td>
                 </tr>
               ) : filteredItems.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-12 text-center">
-                    <div className="flex flex-col items-center gap-3 text-gray-500">
-                      <Package className="w-12 h-12 opacity-30" />
+                    <div className="flex flex-col items-center gap-3 text-gray-300">
+                      <Package className="w-12 h-12 opacity-30" aria-hidden="true" />
                       <p className="font-medium">Kho trống — hãy nạp hàng ngay!</p>
                       <button
                         onClick={() => setShowBulkAdd(true)}
                         className="mt-2 flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 text-sm font-medium hover:bg-blue-600 transition-colors text-white"
                       >
-                        <Upload className="w-4 h-4" />
+                        <Upload className="w-4 h-4" aria-hidden="true" />
                         Nạp hàng ngay
                       </button>
                     </div>
@@ -551,11 +555,11 @@ export default function AdminInventory() {
                   const meta = ITEM_TYPES.find((t) => t.value === item.type);
                   return (
                     <tr key={item.id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-4 py-3 text-xs text-gray-600">
+                      <td className="px-4 py-3 text-xs text-gray-400">
                         {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-gray-300">
+                        <span className="text-sm text-gray-200">
                           {meta?.icon} {meta?.label || item.type}
                         </span>
                       </td>
@@ -566,7 +570,7 @@ export default function AdminInventory() {
                         <StatusBadge status={item.status} />
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-300">
                           {item.createdAt
                             ? new Date(item.createdAt).toLocaleString('vi-VN', {
                                 day: '2-digit', month: '2-digit', year: 'numeric',
@@ -582,8 +586,9 @@ export default function AdminInventory() {
                               onClick={() => setDeleteItem(item)}
                               className="p-2 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-colors"
                               title="Xoá item"
+                              aria-label={`Xoá item ${item.id}`}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" aria-hidden="true" />
                             </button>
                           )}
                         </div>
@@ -598,7 +603,7 @@ export default function AdminInventory() {
 
         {pagination && pagination.totalPages > 1 && (
           <div className="px-4 py-3 border-t border-white/5 flex items-center justify-between">
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-300">
               Trang {currentPage}/{pagination.totalPages} · {pagination.total} items
             </p>
             <Pagination currentPage={currentPage} totalPages={pagination.totalPages} onPageChange={setCurrentPage} />

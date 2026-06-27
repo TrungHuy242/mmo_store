@@ -199,17 +199,17 @@ function ProductPreview({ product, onClose }) {
 
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white/5 rounded-xl p-4">
-            <p className="text-xs text-gray-500">{t('common.price')}</p>
+            <p className="text-xs text-gray-300">{t('common.price')}</p>
             <p className="text-lg font-bold text-green-400">{Number(product.price || 0).toLocaleString('vi-VN')}₫</p>
           </div>
           <div className="bg-white/5 rounded-xl p-4">
-            <p className="text-xs text-gray-500">{t('admin.stock')}</p>
+            <p className="text-xs text-gray-300">{t('admin.stock')}</p>
             <p className={`text-lg font-bold ${product.stock <= 5 ? 'text-red-400' : 'text-green-400'}`}>
               {product.stock ?? 0}
             </p>
           </div>
           <div className="bg-white/5 rounded-xl p-4">
-            <p className="text-xs text-gray-500">{t('admin.sales')}</p>
+            <p className="text-xs text-gray-300">{t('admin.sales')}</p>
             <p className="text-lg font-bold">{product.salesCount || 0}</p>
           </div>
           <div className="bg-white/5 rounded-xl p-4">
@@ -335,21 +335,23 @@ export default function AdminProducts() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">{t('admin.products')}</h1>
-          <p className="text-gray-400 text-sm mt-1">{t('admin.manage_products_title')}</p>
+          <p className="text-gray-300 text-sm mt-1">{t('admin.manage_products_title')}</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => { reloadProducts(); reloadCategories(); }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+            aria-label={t('admin.refresh_products', 'Làm mới sản phẩm')}
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
             {t('admin.refresh')}
           </button>
           <button
             onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-sm font-medium transition-colors"
+            aria-label={t('admin.add_product')}
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4" aria-hidden="true" />
             {t('admin.add_product')}
           </button>
         </div>
@@ -467,12 +469,12 @@ export default function AdminProducts() {
         {loading ? (
           <div className="p-12 text-center">
             <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto" />
-            <p className="text-gray-400 mt-4">{t('common.loading')}</p>
+            <p className="text-gray-300 mt-4">{t('common.loading')}</p>
           </div>
         ) : products.length === 0 ? (
           <div className="p-12 text-center">
-            <Package className="w-12 h-12 mx-auto text-gray-600" />
-            <p className="text-gray-400 mt-4">{t('admin.no_products_yet', 'Chưa có sản phẩm nào')}</p>
+            <Package className="w-12 h-12 mx-auto text-gray-500" aria-hidden="true" />
+            <p className="text-gray-300 mt-4">{t('admin.no_products_yet', 'Chưa có sản phẩm nào')}</p>
             <button
               onClick={() => setShowAddModal(true)}
               className="mt-4 px-4 py-2 rounded-xl bg-blue-500 text-sm font-medium hover:bg-blue-600 transition-colors"
@@ -493,14 +495,14 @@ export default function AdminProducts() {
                       className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/50"
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.product')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.category')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('common.price')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.stock')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.sales')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.rating')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.status')}</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">{t('admin.actions')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.product')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.category')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('common.price')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.stock')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.sales')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.rating')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.status')}</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase">{t('admin.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -526,7 +528,7 @@ export default function AdminProducts() {
                         />
                         <div>
                           <p className="text-sm font-medium group-hover:text-blue-400 transition-colors">{product.name}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-300">
                             {product.createdAt ? new Date(product.createdAt).toLocaleDateString('vi-VN') : ''}
                           </p>
                         </div>
@@ -544,19 +546,19 @@ export default function AdminProducts() {
                           {product.stock ?? 0}
                         </span>
                         {product.stock <= 5 && product.stock >= 0 && (
-                          <AlertTriangle className="w-3 h-3 text-red-400" />
+                          <AlertTriangle className="w-3 h-3 text-red-400" aria-hidden="true" />
                         )}
                       </div>
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4 text-green-400" />
+                        <TrendingUp className="w-4 h-4 text-green-400" aria-hidden="true" />
                         <span className="text-sm">{product.salesCount || 0}</span>
                       </div>
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                        <Star className="w-4 h-4 text-amber-400 fill-amber-400" aria-hidden="true" />
                         <span className="text-sm">{product.rating || '—'}</span>
                       </div>
                     </td>
@@ -567,6 +569,9 @@ export default function AdminProducts() {
                         className={`relative w-10 h-6 rounded-full transition-colors disabled:opacity-50 ${
                           product.isActive ? 'bg-green-500' : 'bg-gray-600'
                         }`}
+                        role="switch"
+                        aria-checked={!!product.isActive}
+                        aria-label={product.isActive ? t('admin.deactivate', 'Vô hiệu hóa') : t('admin.activate', 'Kích hoạt')}
                       >
                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
                           product.isActive ? 'left-5' : 'left-1'
@@ -579,16 +584,18 @@ export default function AdminProducts() {
                           onClick={() => setPreviewProduct(product)}
                           className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
                           title={t('admin.view')}
+                          aria-label={`${t('admin.view')} ${product.name}`}
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-4 h-4" aria-hidden="true" />
                         </button>
                         <button
                           onClick={() => setDeleteProduct(product)}
                           disabled={actionLoading === product.id}
                           className="p-2 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-colors disabled:opacity-50"
                           title={t('admin.delete')}
+                          aria-label={`${t('admin.delete')} ${product.name}`}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" aria-hidden="true" />
                         </button>
                       </div>
                     </td>
@@ -624,7 +631,7 @@ export default function AdminProducts() {
                   )}
                 </div>
                 <div className="p-4">
-                  <span className="text-xs text-gray-500">{product.category?.name || '—'}</span>
+                  <span className="text-xs text-gray-400">{product.category?.name || '—'}</span>
                   <h3 className="font-medium mt-1 group-hover:text-blue-400 transition-colors line-clamp-2">{product.name}</h3>
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-lg font-bold">{Number(product.price || 0).toLocaleString('vi-VN')}₫</span>
@@ -637,7 +644,7 @@ export default function AdminProducts() {
                     <span className={`text-xs ${product.stock > 5 ? 'text-green-400' : 'text-red-400'}`}>
                       {t('admin.stock')}: {product.stock ?? 0}
                     </span>
-                    <span className="text-xs text-gray-500">{product.salesCount || 0} {t('products.sold').toLowerCase()}</span>
+                    <span className="text-xs text-gray-300">{product.salesCount || 0} {t('products.sold').toLowerCase()}</span>
                   </div>
                 </div>
               </motion.div>

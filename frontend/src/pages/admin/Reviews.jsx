@@ -70,8 +70,9 @@ function ReplyModal({ review, onClose, onReply }) {
             <button
               onClick={onClose}
               className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              aria-label="Đóng"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -86,7 +87,7 @@ function ReplyModal({ review, onClose, onReply }) {
                 className="w-10 h-10 rounded-full object-cover"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center" aria-hidden="true">
                 <span className="text-primary font-semibold">
                   {review.user?.name?.[0] || review.user?.email?.[0] || 'U'}
                 </span>
@@ -94,23 +95,23 @@ function ReplyModal({ review, onClose, onReply }) {
             )}
             <div className="flex-1">
               <p className="font-medium text-white">{review.user?.name || 'Khách hàng'}</p>
-              <p className="text-xs text-gray-400">{review.user?.email}</p>
+              <p className="text-xs text-gray-300">{review.user?.email}</p>
               <div className="flex items-center gap-2 mt-1">
                 <StarRating rating={review.rating} size="sm" />
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-gray-400">
                   {new Date(review.createdAt).toLocaleDateString('vi-VN')}
                 </span>
               </div>
             </div>
           </div>
-          <p className="mt-3 text-sm text-gray-300 bg-black/20 rounded-lg p-3">
+          <p className="mt-3 text-sm text-gray-200 bg-black/20 rounded-lg p-3">
             {review.content}
           </p>
         </div>
 
         {/* Reply Form */}
         <form onSubmit={handleSubmit} className="p-6">
-          <label className="block text-sm font-medium text-gray-400 mb-2">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
             Nội dung phản hồi
           </label>
           <textarea
@@ -262,13 +263,14 @@ export default function Reviews() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Quản lý Đánh giá</h1>
-          <p className="text-gray-400 text-sm mt-1">Xem và quản lý đánh giá sản phẩm</p>
+          <p className="text-gray-300 text-sm mt-1">Xem và quản lý đánh giá sản phẩm</p>
         </div>
         <button
           onClick={() => loadReviews()}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+          aria-label="Làm mới đánh giá"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className="w-4 h-4" aria-hidden="true" />
           Làm mới
         </button>
       </div>
@@ -287,7 +289,7 @@ export default function Reviews() {
             </div>
             <span className="text-2xl font-bold">{loading ? '...' : avgRating}</span>
           </div>
-          <p className="text-gray-400 text-sm mt-2">Điểm đánh giá trung bình</p>
+          <p className="text-gray-300 text-sm mt-2">Điểm đánh giá trung bình</p>
         </motion.div>
 
         <motion.div
@@ -302,7 +304,7 @@ export default function Reviews() {
             </div>
             <span className="text-2xl font-bold">{loading ? '...' : total}</span>
           </div>
-          <p className="text-gray-400 text-sm mt-2">Tổng đánh giá</p>
+          <p className="text-gray-300 text-sm mt-2">Tổng đánh giá</p>
         </motion.div>
 
         <motion.div
@@ -317,7 +319,7 @@ export default function Reviews() {
             </div>
             <span className="text-2xl font-bold">{loading ? '...' : fiveStarReviews}</span>
           </div>
-          <p className="text-gray-400 text-sm mt-2">Đánh giá 5 sao</p>
+          <p className="text-gray-300 text-sm mt-2">Đánh giá 5 sao</p>
         </motion.div>
 
         <motion.div
@@ -332,7 +334,7 @@ export default function Reviews() {
             </div>
             <span className="text-2xl font-bold">{loading ? '...' : oneStarReviews}</span>
           </div>
-          <p className="text-gray-400 text-sm mt-2">Đánh giá 1 sao</p>
+          <p className="text-gray-300 text-sm mt-2">Đánh giá 1 sao</p>
         </motion.div>
       </div>
 
@@ -340,7 +342,7 @@ export default function Reviews() {
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Search */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
           <input
             type="text"
             placeholder="Tìm kiếm đánh giá..."
@@ -363,7 +365,7 @@ export default function Reviews() {
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" aria-hidden="true" />
         </div>
 
         {/* Product Filter */}
@@ -380,7 +382,7 @@ export default function Reviews() {
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" aria-hidden="true" />
         </div>
       </div>
 
@@ -390,28 +392,28 @@ export default function Reviews() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-white/5">
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Khách hàng</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Sản phẩm</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Số sao</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Nội dung</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Phản hồi</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Ngày</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Thao tác</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Khách hàng</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Sản phẩm</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Số sao</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nội dung</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Phản hồi</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Ngày</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="px-4 py-12 text-center text-gray-500">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
+                  <td colSpan="8" className="px-4 py-12 text-center text-gray-300">
+                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" aria-hidden="true" />
                     <p>Đang tải...</p>
                   </td>
                 </tr>
               ) : reviews.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-4 py-12 text-center text-gray-500">
-                    <Star className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <td colSpan="8" className="px-4 py-12 text-center text-gray-300">
+                    <Star className="w-12 h-12 mx-auto mb-2 opacity-50" aria-hidden="true" />
                     <p>Không có đánh giá nào</p>
                   </td>
                 </tr>
@@ -438,7 +440,7 @@ export default function Reviews() {
                         )}
                         <div>
                           <p className="text-sm font-medium text-white">{review.user?.name || 'Khách hàng'}</p>
-                          <p className="text-xs text-gray-500">{review.user?.email}</p>
+                          <p className="text-xs text-gray-300">{review.user?.email}</p>
                         </div>
                       </div>
                     </td>
@@ -459,14 +461,14 @@ export default function Reviews() {
                       {review.adminReply ? (
                         <div className="max-w-[200px]">
                           <p className="text-xs text-blue-400 font-medium">Admin:</p>
-                          <p className="text-xs text-gray-400 line-clamp-2">{review.adminReply}</p>
+                          <p className="text-xs text-gray-300 line-clamp-2">{review.adminReply}</p>
                         </div>
                       ) : (
-                        <span className="text-xs text-gray-500 italic">Chưa phản hồi</span>
+                        <span className="text-xs text-gray-400 italic">Chưa phản hồi</span>
                       )}
                     </td>
                     <td className="px-4 py-4">
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-gray-300">
                         {new Date(review.createdAt).toLocaleDateString('vi-VN')}
                       </span>
                     </td>
@@ -476,15 +478,17 @@ export default function Reviews() {
                           onClick={() => setReplyReview(review)}
                           className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
                           title="Phản hồi"
+                          aria-label={`Phản hồi đánh giá của ${review.user?.name || review.user?.email || 'khách hàng'}`}
                         >
-                          <MessageSquare className="w-4 h-4" />
+                          <MessageSquare className="w-4 h-4" aria-hidden="true" />
                         </button>
                         <button
                           onClick={() => handleDelete(review.id)}
                           className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                           title="Xóa"
+                          aria-label={`Xóa đánh giá của ${review.user?.name || review.user?.email || 'khách hàng'}`}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" aria-hidden="true" />
                         </button>
                       </div>
                     </td>

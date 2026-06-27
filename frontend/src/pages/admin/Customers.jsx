@@ -43,7 +43,7 @@ const StatBox = ({ label, value, color = 'text-white', loading }) => (
     animate={{ opacity: 1, y: 0 }}
     className="bg-[#111827] rounded-xl border border-white/5 p-4"
   >
-    <p className="text-sm text-gray-400">{label}</p>
+    <p className="text-sm text-gray-300">{label}</p>
     <p className={`text-2xl font-bold mt-1 ${color}`}>{loading ? '...' : value}</p>
   </motion.div>
 );
@@ -100,14 +100,15 @@ export default function AdminCustomers() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">{t('admin.customers')}</h1>
-          <p className="text-gray-400 text-sm mt-1">{t('admin.manage_users')}</p>
+          <p className="text-gray-300 text-sm mt-1">{t('admin.manage_users')}</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={reload}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+            aria-label={t('admin.refresh_customers', 'Làm mới khách hàng')}
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
             {t('admin.refresh')}
           </button>
         </div>
@@ -133,16 +134,16 @@ export default function AdminCustomers() {
 
       {/* Filters */}
       <div className="flex flex-col lg:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-          <input
-            type="text"
-            placeholder={t('admin.search')}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#111827] border border-white/10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
-          />
-        </div>
+<div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
+        <input
+          type="text"
+          placeholder={t('admin.search')}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#111827] border border-white/10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+        />
+      </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -163,26 +164,26 @@ export default function AdminCustomers() {
         {loading ? (
           <div className="p-12 text-center">
             <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto" />
-            <p className="text-gray-400 mt-4">{t('common.loading')}</p>
+            <p className="text-gray-300 mt-4">{t('common.loading')}</p>
           </div>
         ) : customers.length === 0 ? (
           <div className="p-12 text-center">
-            <User className="w-12 h-12 mx-auto text-gray-600" />
-            <p className="text-gray-400 mt-4">Chưa có khách hàng nào</p>
+            <User className="w-12 h-12 mx-auto text-gray-500" aria-hidden="true" />
+            <p className="text-gray-300 mt-4">Chưa có khách hàng nào</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/5">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.customer')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Email</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Chi tiêu</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Đơn hàng</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Số dư</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Đăng nhập cuối</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.status')}</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">{t('admin.actions')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.customer')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Email</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Chi tiêu</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Đơn hàng</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Số dư</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Đăng nhập cuối</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.status')}</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase">{t('admin.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -190,12 +191,12 @@ export default function AdminCustomers() {
                   <tr key={customer.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold" aria-hidden="true">
                           {(customer.fullName || customer.email || 'U').charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <p className="font-medium">{customer.fullName || customer.username || '—'}</p>
-                          <p className="text-xs text-gray-500">{customer.username || '—'}</p>
+                          <p className="text-xs text-gray-300">{customer.username || '—'}</p>
                         </div>
                       </div>
                     </td>
@@ -216,7 +217,7 @@ export default function AdminCustomers() {
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-300">
                         {customer.lastLogin ? new Date(customer.lastLogin).toLocaleString('vi-VN') : '—'}
                       </span>
                     </td>
@@ -234,13 +235,14 @@ export default function AdminCustomers() {
                               : 'text-green-400 hover:text-green-300'
                           }`}
                           title={customer.status === 'active' ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                          aria-label={`${customer.status === 'active' ? t('admin.suspend_account', 'Vô hiệu hóa') : t('admin.activate_account', 'Kích hoạt')} ${customer.fullName || customer.email}`}
                         >
                           {actionLoading === customer.id ? (
-                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
                           ) : customer.status === 'active' ? (
-                            <UserX className="w-4 h-4" />
+                            <UserX className="w-4 h-4" aria-hidden="true" />
                           ) : (
-                            <UserCheck className="w-4 h-4" />
+                            <UserCheck className="w-4 h-4" aria-hidden="true" />
                           )}
                         </button>
                       </div>
@@ -253,7 +255,7 @@ export default function AdminCustomers() {
         )}
 
         <div className="px-4 py-3 border-t border-white/5 flex items-center justify-between">
-          <p className="text-sm text-gray-400">{total} khách hàng</p>
+          <p className="text-sm text-gray-300">{total} khách hàng</p>
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={changePage} />
         </div>
       </motion.div>

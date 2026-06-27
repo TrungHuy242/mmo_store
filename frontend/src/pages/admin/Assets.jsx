@@ -170,13 +170,14 @@ export default function Assets() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Quản lý tài liệu số</h1>
-          <p className="text-gray-400 text-sm mt-1">Quản lý các file tài liệu, tài sản số của sản phẩm</p>
+          <p className="text-gray-300 text-sm mt-1">Quản lý các file tài liệu, tài sản số của sản phẩm</p>
         </div>
         <button
           onClick={() => setUploadModal(true)}
           className="inline-flex items-center gap-2 px-4 py-2 bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan rounded-xl hover:bg-neon-cyan/20 transition-all"
+          aria-label="Tải lên tệp mới"
         >
-          <Upload className="w-4 h-4" />
+          <Upload className="w-4 h-4" aria-hidden="true" />
           Tải lên tệp mới
         </button>
       </div>
@@ -193,7 +194,7 @@ export default function Assets() {
               <File className="w-5 h-5 text-neon-cyan" />
             </div>
             <div>
-              <p className="text-gray-400 text-xs uppercase tracking-wider">Tổng tài liệu</p>
+              <p className="text-gray-300 text-xs uppercase tracking-wider">Tổng tài liệu</p>
               <p className="text-xl font-bold text-white">{pagination.total}</p>
             </div>
           </div>
@@ -210,7 +211,7 @@ export default function Assets() {
               <Download className="w-5 h-5 text-neon-magenta" />
             </div>
             <div>
-              <p className="text-gray-400 text-xs uppercase tracking-wider">Tổng lượt tải</p>
+              <p className="text-gray-300 text-xs uppercase tracking-wider">Tổng lượt tải</p>
               <p className="text-xl font-bold text-white">
                 {assets.reduce((sum, a) => sum + (a.downloadCount || 0), 0)}
               </p>
@@ -229,7 +230,7 @@ export default function Assets() {
               <Archive className="w-5 h-5 text-neon-gold" />
             </div>
             <div>
-              <p className="text-gray-400 text-xs uppercase tracking-wider">Tổng dung lượng</p>
+              <p className="text-gray-300 text-xs uppercase tracking-wider">Tổng dung lượng</p>
               <p className="text-xl font-bold text-white">
                 {formatFileSize(assets.reduce((sum, a) => sum + (a.fileSize || 0), 0))}
               </p>
@@ -243,7 +244,7 @@ export default function Assets() {
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
             <input
               type="text"
               placeholder="Tìm kiếm tên file..."
@@ -293,9 +294,10 @@ export default function Assets() {
           {/* Refresh Button */}
           <button
             onClick={fetchAssets}
-            className="p-2 bg-white/5 border border-white/10 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+            className="p-2 bg-white/5 border border-white/10 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all"
+            aria-label="Làm mới"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -306,21 +308,21 @@ export default function Assets() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-white/10">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tên tệp</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Loại</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Sản phẩm</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Kích thước</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Lượt tải</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Ngày tải lên</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Thao tác</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-300 uppercase tracking-wider">Tên tệp</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-300 uppercase tracking-wider">Loại</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-300 uppercase tracking-wider">Sản phẩm</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-300 uppercase tracking-wider">Kích thước</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-300 uppercase tracking-wider">Lượt tải</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-300 uppercase tracking-wider">Ngày tải lên</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-300 uppercase tracking-wider">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-12 text-center">
-                    <div className="flex items-center justify-center gap-2 text-gray-400">
-                      <RefreshCw className="w-5 h-5 animate-spin" />
+                    <div className="flex items-center justify-center gap-2 text-gray-300">
+                      <RefreshCw className="w-5 h-5 animate-spin" aria-hidden="true" />
                       <span>Đang tải...</span>
                     </div>
                   </td>
@@ -328,8 +330,8 @@ export default function Assets() {
               ) : assets.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-12 text-center">
-                    <div className="flex flex-col items-center gap-2 text-gray-400">
-                      <File className="w-12 h-12 opacity-30" />
+                    <div className="flex flex-col items-center gap-2 text-gray-300">
+                      <File className="w-12 h-12 opacity-30" aria-hidden="true" />
                       <p>Chưa có tài liệu nào</p>
                     </div>
                   </td>
@@ -351,7 +353,7 @@ export default function Assets() {
                         <div>
                           <p className="text-white font-medium truncate max-w-[200px]">{asset.originalName || asset.name}</p>
                           {asset.version > 1 && (
-                            <p className="text-xs text-gray-500">v{asset.version}</p>
+                            <p className="text-xs text-gray-300">v{asset.version}</p>
                           )}
                         </div>
                       </div>
@@ -373,7 +375,7 @@ export default function Assets() {
                       <p className="text-gray-300 text-sm">{asset.downloadCount || 0}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <p className="text-gray-400 text-sm">{formatDate(asset.createdAt)}</p>
+                      <p className="text-gray-300 text-sm">{formatDate(asset.createdAt)}</p>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
@@ -381,8 +383,9 @@ export default function Assets() {
                           onClick={() => setDeleteModal({ open: true, asset })}
                           className="p-2 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-all"
                           title="Xóa"
+                          aria-label={`Xóa ${asset.originalName || asset.name}`}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" aria-hidden="true" />
                         </button>
                       </div>
                     </td>
@@ -396,7 +399,7 @@ export default function Assets() {
         {/* Pagination */}
         {pagination.totalPages > 1 && (
           <div className="px-4 py-3 border-t border-white/10 flex items-center justify-between">
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-300">
               Trang {pagination.page} / {pagination.totalPages}
             </p>
             <div className="flex gap-2">
@@ -441,15 +444,16 @@ export default function Assets() {
                 <button
                   onClick={() => setUploadModal(false)}
                   className="p-1 text-gray-400 hover:text-white"
+                  aria-label="Đóng"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5" aria-hidden="true" />
                 </button>
               </div>
 
               <div className="space-y-4">
                 {/* Product Select */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Sản phẩm liên kết
                   </label>
                   <select
@@ -559,7 +563,7 @@ export default function Assets() {
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-red-400" />
+                  <AlertTriangle className="w-5 h-5 text-red-400" aria-hidden="true" />
                 </div>
                 <h3 className="text-lg font-bold text-white">Xác nhận xóa</h3>
               </div>
@@ -567,10 +571,10 @@ export default function Assets() {
               <p className="text-gray-300 mb-2">
                 Bạn có chắc chắn muốn xóa tài liệu này?
               </p>
-              
+
               <div className="glass p-3 rounded-lg border border-white/10 mb-6">
                 <p className="text-white font-medium truncate">{deleteModal.asset?.originalName}</p>
-                <p className="text-sm text-gray-400">{formatFileSize(deleteModal.asset?.fileSize)}</p>
+                <p className="text-sm text-gray-300">{formatFileSize(deleteModal.asset?.fileSize)}</p>
               </div>
 
               <p className="text-sm text-red-400 mb-6">
@@ -580,7 +584,7 @@ export default function Assets() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteModal({ open: false, asset: null })}
-                  className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-gray-400 hover:text-white transition-all"
+                  className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-gray-300 hover:text-white transition-all"
                 >
                   Hủy
                 </button>
@@ -588,7 +592,7 @@ export default function Assets() {
                   onClick={handleDelete}
                   className="flex-1 px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-500/20 transition-all flex items-center justify-center gap-2"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4" aria-hidden="true" />
                   Xóa
                 </button>
               </div>

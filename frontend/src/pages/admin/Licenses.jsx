@@ -190,7 +190,7 @@ export default function Licenses() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">License Keys</h1>
-          <p className="text-gray-400 text-sm mt-1">Quản lý license keys cho sản phẩm</p>
+          <p className="text-gray-300 text-sm mt-1">Quản lý license keys cho sản phẩm</p>
         </div>
         <button 
           onClick={() => setShowGenerateModal(true)}
@@ -305,8 +305,9 @@ export default function Licenses() {
         <button 
           onClick={() => { loadLicenses(); loadStats(); }}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+          aria-label="Làm mới"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
         </button>
       </div>
 
@@ -417,15 +418,17 @@ export default function Licenses() {
                               onClick={() => handleDeactivate(license.id)}
                               className="p-2 text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
                               title="Vô hiệu hóa"
+                              aria-label={`Vô hiệu hóa license ${license.key}`}
                             >
-                              <Unlock className="w-4 h-4" />
+                              <Unlock className="w-4 h-4" aria-hidden="true" />
                             </button>
                             <button
                               onClick={() => handleBlacklist(license.id)}
                               className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                               title="Đưa vào danh sách đen"
+                              aria-label={`Đưa vào danh sách đen license ${license.key}`}
                             >
-                              <Ban className="w-4 h-4" />
+                              <Ban className="w-4 h-4" aria-hidden="true" />
                             </button>
                           </>
                         )}
@@ -434,8 +437,9 @@ export default function Licenses() {
                             onClick={() => handleBlacklist(license.id)}
                             className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Đưa vào danh sách đen"
+                            aria-label={`Đưa vào danh sách đen license ${license.key}`}
                           >
-                            <ShieldOff className="w-4 h-4" />
+                            <ShieldOff className="w-4 h-4" aria-hidden="true" />
                           </button>
                         )}
                       </div>
@@ -468,14 +472,15 @@ export default function Licenses() {
               <div className="p-6 border-b border-white/5">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold flex items-center gap-2">
-                    <Key className="w-5 h-5 text-indigo-400" />
+                    <Key className="w-5 h-5 text-indigo-400" aria-hidden="true" />
                     Tạo Keys hàng loạt
                   </h2>
                   <button
                     onClick={() => setShowGenerateModal(false)}
                     className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    aria-label="Đóng"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-5 h-5" aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -483,7 +488,7 @@ export default function Licenses() {
               <form onSubmit={handleGenerate} className="p-6 space-y-5">
                 {/* Product Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Sản phẩm <span className="text-red-400">*</span>
                   </label>
                   <select

@@ -31,7 +31,7 @@ export default function AdminSettings() {
       {/* Page Header */}
       <div>
         <h1 className="text-2xl font-bold">{t('admin.adminSettings')}</h1>
-        <p className="text-gray-400 text-sm mt-1">{t('admin.manage_products_title')}</p>
+        <p className="text-gray-300 text-sm mt-1">{t('admin.manage_products_title')}</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">

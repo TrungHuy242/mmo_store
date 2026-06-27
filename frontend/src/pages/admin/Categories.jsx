@@ -28,25 +28,27 @@ export default function AdminCategories() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">{t('admin.categories')}</h1>
-          <p className="text-gray-400 text-sm mt-1">{t('admin.manage_categories')}</p>
+          <p className="text-gray-300 text-sm mt-1">{t('admin.manage_categories')}</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-sm font-medium transition-colors"
+          aria-label={t('admin.add_category')}
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4" aria-hidden="true" />
           {t('admin.add_category')}
         </button>
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
         <input
           type="text"
           placeholder={t('admin.search')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#111827] border border-white/10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+          aria-label={t('admin.search')}
         />
       </div>
 
@@ -61,12 +63,12 @@ export default function AdminCategories() {
           >
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-white/5 flex items-center justify-center text-3xl">
+                <div className="w-14 h-14 rounded-xl bg-white/5 flex items-center justify-center text-3xl" aria-hidden="true">
                   {cat.icon}
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">{cat.name}</h3>
-                  <p className="text-xs text-gray-500">/{cat.slug}</p>
+                  <p className="text-xs text-gray-300">/{cat.slug}</p>
                 </div>
               </div>
               <span className={`px-2 py-1 text-xs rounded-full ${
@@ -77,11 +79,11 @@ export default function AdminCategories() {
             </div>
             <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-gray-500">{t('admin.products')}</p>
+                <p className="text-xs text-gray-300">{t('admin.products')}</p>
                 <p className="text-lg font-bold">{cat.products}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">{t('admin.revenue')}</p>
+                <p className="text-xs text-gray-300">{t('admin.revenue')}</p>
                 <p className="text-lg font-bold text-green-400">{(cat.revenue / 1000000).toFixed(0)}M₫</p>
               </div>
             </div>
@@ -89,12 +91,13 @@ export default function AdminCategories() {
               <button
                 onClick={() => setEditingCategory(cat)}
                 className="flex-1 py-2 rounded-lg bg-white/5 text-sm font-medium hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
+                aria-label={`${t('admin.edit')} ${cat.name}`}
               >
-                <Edit className="w-4 h-4" />
+                <Edit className="w-4 h-4" aria-hidden="true" />
                 {t('admin.edit')}
               </button>
-              <button className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">
-                <Trash2 className="w-4 h-4" />
+              <button className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors" aria-label={`Xóa ${cat.name}`}>
+                <Trash2 className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
           </motion.div>

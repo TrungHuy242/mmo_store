@@ -192,21 +192,23 @@ export default function Coupons() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Mã Giảm Giá</h1>
-          <p className="text-gray-400 text-sm mt-1">Quản lý mã giảm giá và khuyến mãi</p>
+          <p className="text-gray-300 text-sm mt-1">Quản lý mã giảm giá và khuyến mãi</p>
         </div>
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={() => loadCoupons()}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+            aria-label="Làm mới mã giảm giá"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
             Làm mới
           </button>
-          <button 
+          <button
             onClick={handleOpenModal}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            aria-label="Tạo mã giảm giá mới"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4" aria-hidden="true" />
             Tạo mã mới
           </button>
         </div>

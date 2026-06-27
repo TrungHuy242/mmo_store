@@ -41,8 +41,8 @@ const StatCard = ({ titleKey, value, change, changeType, icon: Icon, gradient })
 };
 
 const EmptyChart = ({ message }) => (
-  <div className="h-64 flex flex-col items-center justify-center text-gray-500">
-    <Package className="w-10 h-10 opacity-30 mb-2" />
+  <div className="h-64 flex flex-col items-center justify-center text-gray-400">
+    <Package className="w-10 h-10 opacity-30 mb-2" aria-hidden="true" />
     <p className="text-sm">{message}</p>
   </div>
 );
@@ -57,7 +57,7 @@ const ChartCard = ({ title, loading, children, empty }) => (
     animate={{ opacity: 1, y: 0 }}
     className="bg-[#111827] rounded-2xl border border-white/5 p-6"
   >
-    <h3 className="font-semibold mb-4">{title}</h3>
+    <h2 className="text-base font-semibold mb-4">{title}</h2>
     <div className="h-64">
       {loading ? (
         <SkeletonBlock height="100%" />
@@ -140,17 +140,20 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{t('admin.dashboard')}</h1>
-          <p className="text-gray-400 text-sm mt-1">{t('admin.welcome_back')}</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">{t('admin.dashboard')}</h1>
+            <p className="text-gray-300 text-sm mt-1">{t('admin.welcome_back')}</p>
+          </div>
+          <button
+            onClick={reload}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+            aria-label={t('admin.refresh_dashboard', 'Làm mới Dashboard')}
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
+            {t('admin.refresh')}
+          </button>
         </div>
-        <button
-          onClick={reload}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          {t('admin.refresh')}
-        </button>
       </div>
 
       {/* Stats Grid */}
@@ -233,7 +236,7 @@ export default function AdminDashboard() {
           className="lg:col-span-2 bg-[#111827] rounded-2xl border border-white/5 overflow-hidden"
         >
           <div className="px-6 py-4 border-b border-white/5">
-            <h3 className="font-semibold">{t('admin.recent_orders')}</h3>
+            <h2 className="font-semibold text-base">{t('admin.recent_orders')}</h2>
           </div>
           <div className="divide-y divide-white/5">
             {recentOrdersRes.loading ? (
@@ -244,25 +247,25 @@ export default function AdminDashboard() {
                 </div>
               ))
             ) : recentOrders.length === 0 ? (
-              <div className="px-6 py-8 text-center text-gray-500">
-                <Clock className="w-8 h-8 mx-auto mb-2 opacity-30" />
+              <div className="px-6 py-8 text-center text-gray-400">
+                <Clock className="w-8 h-8 mx-auto mb-2 opacity-30" aria-hidden="true" />
                 <p className="text-sm">Chưa có đơn hàng nào</p>
               </div>
             ) : (
               recentOrders.map((order) => (
                 <div key={order.id} className="px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold" aria-hidden="true">
                       {(order.user?.email || order.user?.username || 'U').charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <p className="font-medium text-sm">{order.user?.email || order.user?.username || '—'}</p>
-                      <p className="text-xs text-gray-500">#{order.orderNumber || order.id}</p>
+                      <p className="text-xs text-gray-400">#{order.orderNumber || order.id}</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-sm">{Number(order.total || 0).toLocaleString('vi-VN')}₫</p>
-                    <p className="text-xs text-gray-500 capitalize">{order.status}</p>
+                    <p className="text-xs text-gray-400 capitalize">{order.status}</p>
                   </div>
                 </div>
               ))
@@ -277,7 +280,7 @@ export default function AdminDashboard() {
           className="bg-[#111827] rounded-2xl border border-white/5 overflow-hidden"
         >
           <div className="px-6 py-4 border-b border-white/5">
-            <h3 className="font-semibold">{t('admin.top_products')}</h3>
+            <h2 className="font-semibold text-base">{t('admin.top_products')}</h2>
           </div>
           <div className="divide-y divide-white/5">
             {topProductsRes.loading ? (
@@ -288,19 +291,19 @@ export default function AdminDashboard() {
                 </div>
               ))
             ) : topProducts.length === 0 ? (
-              <div className="px-6 py-8 text-center text-gray-500">
-                <Package className="w-8 h-8 mx-auto mb-2 opacity-30" />
+              <div className="px-6 py-8 text-center text-gray-400">
+                <Package className="w-8 h-8 mx-auto mb-2 opacity-30" aria-hidden="true" />
                 <p className="text-sm">Chưa có sản phẩm nào</p>
               </div>
             ) : (
               topProducts.map((product, i) => (
                 <div key={product.id} className="px-6 py-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
-                  <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center">
+                  <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center" aria-hidden="true">
                     {i + 1}
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{product.name}</p>
-                    <p className="text-xs text-gray-500">{product.salesCount || 0} {t('products.sold').toLowerCase()}</p>
+                    <p className="text-xs text-gray-400">{product.salesCount || 0} {t('products.sold').toLowerCase()}</p>
                   </div>
                   <span className="text-sm font-medium text-green-400">
                     {Number(product.price || 0).toLocaleString('vi-VN')}₫

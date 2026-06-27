@@ -66,7 +66,7 @@ function OrderDetailsModal({ order, onClose, onComplete, onCancel, loading }) {
           <h2 className="text-lg font-semibold">
             {t('admin.order')} #{order.orderNumber || order.id}
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-300">
             {order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : '—'}
           </p>
         </div>
@@ -96,29 +96,29 @@ function OrderDetailsModal({ order, onClose, onComplete, onCancel, loading }) {
 
         {/* Customer Info */}
         <div className="bg-white/5 rounded-xl p-4">
-          <h3 className="text-sm font-medium text-gray-400 mb-3">{t('admin.customer')}</h3>
+          <h3 className="text-sm font-medium text-gray-300 mb-3">{t('admin.customer')}</h3>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-lg font-bold">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-lg font-bold" aria-hidden="true">
               {(order.user?.email || order.user?.username || 'U').charAt(0).toUpperCase()}
             </div>
             <div>
               <p className="font-medium">{order.user?.fullName || order.user?.username || '—'}</p>
-              <p className="text-sm text-gray-500">{order.user?.email || '—'}</p>
+              <p className="text-sm text-gray-300">{order.user?.email || '—'}</p>
             </div>
           </div>
         </div>
 
         {/* Items */}
         <div className="bg-white/5 rounded-xl p-4">
-          <h3 className="text-sm font-medium text-gray-400 mb-3">{t('admin.product')}</h3>
+          <h3 className="text-sm font-medium text-gray-300 mb-3">{t('admin.product')}</h3>
           <div className="space-y-3">
             {(order.items || []).map((item, idx) => (
               <div key={idx} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Package className="w-8 h-8 p-1.5 rounded-lg bg-blue-500/20 text-blue-400" />
+                  <Package className="w-8 h-8 p-1.5 rounded-lg bg-blue-500/20 text-blue-400" aria-hidden="true" />
                   <div>
                     <p className="font-medium">{item.product?.name || '—'}</p>
-                    <p className="text-sm text-gray-500">{t('admin.quantity_num')} {item.quantity}</p>
+                    <p className="text-sm text-gray-300">{t('admin.quantity_num')} {item.quantity}</p>
                   </div>
                 </div>
                 <p className="font-bold">{Number(item.price || 0).toLocaleString('vi-VN')}₫</p>
@@ -126,7 +126,7 @@ function OrderDetailsModal({ order, onClose, onComplete, onCancel, loading }) {
             ))}
           </div>
           <div className="mt-4 pt-4 border-t border-white/10 flex justify-between">
-            <span className="text-gray-400">{t('common.total')}</span>
+            <span className="text-gray-300">{t('common.total')}</span>
             <span className="text-lg font-bold text-green-400">
               {Number(order.total || 0).toLocaleString('vi-VN')}₫
             </span>
@@ -135,10 +135,10 @@ function OrderDetailsModal({ order, onClose, onComplete, onCancel, loading }) {
 
         {/* Payment Info */}
         <div className="bg-white/5 rounded-xl p-4">
-          <h3 className="text-sm font-medium text-gray-400 mb-3">{t('admin.payment')}</h3>
+          <h3 className="text-sm font-medium text-gray-300 mb-3">{t('admin.payment')}</h3>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-gray-500" />
+              <CreditCard className="w-5 h-5 text-gray-400" aria-hidden="true" />
               <span className="capitalize">{order.paymentMethod || '—'}</span>
             </div>
             <StatusBadge status={order.status === 'completed' ? 'completed' : 'paid'} />
@@ -234,14 +234,15 @@ export default function AdminOrders() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">{t('admin.orders')}</h1>
-          <p className="text-gray-400 text-sm mt-1">{t('admin.manage_all_orders')}</p>
+          <p className="text-gray-300 text-sm mt-1">{t('admin.manage_all_orders')}</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={reload}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+            aria-label={t('admin.refresh_orders', 'Làm mới danh sách đơn hàng')}
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
             {t('admin.refresh')}
           </button>
         </div>
@@ -296,26 +297,26 @@ export default function AdminOrders() {
         {loading ? (
           <div className="p-12 text-center">
             <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto" />
-            <p className="text-gray-400 mt-4">{t('common.loading')}</p>
+            <p className="text-gray-300 mt-4">{t('common.loading')}</p>
           </div>
         ) : orders.length === 0 ? (
           <div className="p-12 text-center">
-            <Package className="w-12 h-12 mx-auto text-gray-600" />
-            <p className="text-gray-400 mt-4">Chưa có đơn hàng nào</p>
+            <Package className="w-12 h-12 mx-auto text-gray-500" aria-hidden="true" />
+            <p className="text-gray-300 mt-4">Chưa có đơn hàng nào</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/5">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.order')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.customer')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.product')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.amount')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.payment')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.status')}</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">{t('admin.date')}</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">{t('admin.actions')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.order')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.customer')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.product')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.amount')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.payment')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.status')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">{t('admin.date')}</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase">{t('admin.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -331,12 +332,12 @@ export default function AdminOrders() {
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold" aria-hidden="true">
                           {(order.user?.email || order.user?.username || 'U').charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <p className="text-sm font-medium">{order.user?.fullName || order.user?.username || '—'}</p>
-                          <p className="text-xs text-gray-500">{order.user?.email || '—'}</p>
+                          <p className="text-xs text-gray-300">{order.user?.email || '—'}</p>
                         </div>
                       </div>
                     </td>
@@ -344,7 +345,7 @@ export default function AdminOrders() {
                       <div className="flex flex-col gap-1">
                         {(order.items || []).slice(0, 2).map((item, idx) => (
                           <div key={idx} className="flex items-center gap-2">
-                            <Package className="w-4 h-4 text-gray-500" />
+                            <Package className="w-4 h-4 text-gray-400" aria-hidden="true" />
                             <span className="text-sm">{item.product?.name || '—'}</span>
                             {item.quantity > 1 && (
                               <span className="px-1.5 py-0.5 text-xs bg-white/10 rounded">x{item.quantity}</span>
@@ -352,7 +353,7 @@ export default function AdminOrders() {
                           </div>
                         ))}
                         {(order.items?.length || 0) > 2 && (
-                          <span className="text-xs text-gray-500">+{order.items.length - 2} more</span>
+                          <span className="text-xs text-gray-300">+{order.items.length - 2} more</span>
                         )}
                       </div>
                     </td>
@@ -366,7 +367,7 @@ export default function AdminOrders() {
                       <StatusBadge status={order.status} />
                     </td>
                     <td className="px-4 py-4">
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-300">
                         {order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : '—'}
                       </span>
                     </td>
@@ -376,8 +377,9 @@ export default function AdminOrders() {
                           onClick={() => setSelectedOrder(order)}
                           className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
                           title={t('admin.view_details')}
+                          aria-label={`${t('admin.view_details')} ${order.orderNumber || order.id}`}
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-4 h-4" aria-hidden="true" />
                         </button>
                         {(order.status === 'pending' || order.status === 'paid') && (
                           <button
@@ -385,11 +387,12 @@ export default function AdminOrders() {
                             disabled={actionLoading === order.id}
                             className="p-2 rounded-lg hover:bg-green-500/10 text-gray-400 hover:text-green-400 transition-colors disabled:opacity-50"
                             title={t('admin.mark_complete')}
+                            aria-label={`${t('admin.mark_complete')} ${order.orderNumber || order.id}`}
                           >
                             {actionLoading === order.id ? (
-                              <RefreshCw className="w-4 h-4 animate-spin" />
+                              <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
                             ) : (
-                              <CheckCircle className="w-4 h-4" />
+                              <CheckCircle className="w-4 h-4" aria-hidden="true" />
                             )}
                           </button>
                         )}
@@ -399,8 +402,9 @@ export default function AdminOrders() {
                             disabled={actionLoading === order.id}
                             className="p-2 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-colors disabled:opacity-50"
                             title={t('admin.cancel_order')}
+                            aria-label={`${t('admin.cancel_order')} ${order.orderNumber || order.id}`}
                           >
-                            <XCircle className="w-4 h-4" />
+                            <XCircle className="w-4 h-4" aria-hidden="true" />
                           </button>
                         )}
                       </div>
@@ -413,7 +417,7 @@ export default function AdminOrders() {
         )}
 
         <div className="px-4 py-3 border-t border-white/5 flex items-center justify-between">
-          <p className="text-sm text-gray-400">{total} {t('admin.orders').toLowerCase()}</p>
+          <p className="text-sm text-gray-300">{total} {t('admin.orders').toLowerCase()}</p>
           <Pagination currentPage={page} totalPages={totalPages} onPageChange={changePage} />
         </div>
       </motion.div>

@@ -84,13 +84,15 @@ export default function AdminLayout({ children }) {
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="p-1.5 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white"
+            aria-label={collapsed ? t('admin.expand_sidebar', 'Mở rộng thanh bên') : t('admin.collapse_sidebar', 'Thu gọn thanh bên')}
+            aria-expanded={!collapsed}
           >
             {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4 px-2">
+        <nav className="flex-1 overflow-y-auto py-4 px-2" aria-label={t('admin.primary_navigation', 'Điều hướng chính')}>
           <div className="space-y-1">
             {menuItems.map((item) => {
               const isActive = currentPath === item.path || (item.path !== '/admin' && currentPath.startsWith(item.path));
@@ -147,6 +149,8 @@ export default function AdminLayout({ children }) {
         <button
           onClick={() => setMobileOpen(true)}
           className="p-2 rounded-lg hover:bg-white/5 transition-colors"
+          aria-label={t('admin.open_menu', 'Mở menu')}
+          aria-expanded={mobileOpen}
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -157,18 +161,20 @@ export default function AdminLayout({ children }) {
           <span className="font-bold">MMO Store</span>
         </Link>
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={() => setSearchOpen(true)}
             className="p-2 rounded-lg hover:bg-white/5 transition-colors"
+            aria-label={t('admin.open_search', 'Mở tìm kiếm')}
           >
             <Search className="w-5 h-5" />
           </button>
-          <button 
+          <button
             onClick={() => setNotificationsOpen(true)}
             className="p-2 rounded-lg hover:bg-white/5 transition-colors relative"
+            aria-label={t('admin.open_notifications', 'Mở thông báo')}
           >
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full" />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -201,6 +207,7 @@ export default function AdminLayout({ children }) {
                 <button
                   onClick={() => setMobileOpen(false)}
                   className="p-2 rounded-lg hover:bg-white/5 transition-colors"
+                  aria-label={t('admin.close_menu', 'Đóng menu')}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -240,34 +247,41 @@ export default function AdminLayout({ children }) {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className={`flex-1 min-h-screen pt-16 lg:pt-0 transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
+      <main
+        className={`flex-1 min-h-screen pt-16 lg:pt-0 transition-all duration-300 ${collapsed ? 'lg:ml-16' : 'lg:ml-64'}`}
+        aria-label={t('admin.main_content', 'Nội dung chính')}
+      >
         {/* Top Bar */}
         <header className="sticky top-0 z-30 h-16 bg-[#09090b]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setSearchOpen(true)}
               className="hidden lg:flex items-center gap-3 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:border-white/20 transition-colors"
+              aria-label={t('admin.open_search', 'Mở tìm kiếm')}
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-4 h-4" aria-hidden="true" />
               <span className="text-sm">{t('admin.search')}</span>
-              <kbd className="ml-8 px-1.5 py-0.5 text-xs bg-white/10 rounded">⌘K</kbd>
+              <kbd className="ml-8 px-1.5 py-0.5 text-xs bg-white/10 rounded" aria-hidden="true">⌘K</kbd>
             </button>
           </div>
 
           <div className="flex items-center gap-3">
             {/* Quick Actions */}
             <button className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 transition-colors text-sm font-medium">
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4" aria-hidden="true" />
               <span>{t('admin.quickAdd')}</span>
             </button>
 
             {/* Language Switcher */}
             <div className="relative group">
-              <button 
+              <button
                 onClick={() => setLanguageOpen(!languageOpen)}
                 className="p-2 rounded-lg hover:bg-white/5 transition-colors flex items-center gap-1.5 text-gray-400 hover:text-white"
+                aria-label={t('admin.change_language', 'Đổi ngôn ngữ')}
+                aria-haspopup="menu"
+                aria-expanded={languageOpen}
               >
-                <Globe className="w-5 h-5" />
+                <Globe className="w-5 h-5" aria-hidden="true" />
                 <span className="text-xs font-semibold uppercase">{i18n.language}</span>
               </button>
               <div className={`absolute right-0 top-full mt-2 w-36 bg-[#111827] rounded-xl border border-white/10 shadow-xl transition-all py-1 z-50 ${languageOpen ? 'opacity-100 visible' : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible'}`}>
@@ -287,23 +301,30 @@ export default function AdminLayout({ children }) {
             </div>
 
             {/* Notifications */}
-            <button 
+            <button
               onClick={() => setNotificationsOpen(!notificationsOpen)}
               className="p-2 rounded-lg hover:bg-white/5 transition-colors relative"
+              aria-label={t('admin.open_notifications', 'Mở thông báo')}
+              aria-haspopup="dialog"
+              aria-expanded={notificationsOpen}
             >
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full" />
+              <Bell className="w-5 h-5" aria-hidden="true" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full" aria-hidden="true" />
             </button>
 
             {/* User Menu */}
             <div className="relative group">
-              <button className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-white/5 transition-colors">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold">
+              <button
+                className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-white/5 transition-colors"
+                aria-label={t('admin.user_menu', 'Menu người dùng')}
+                aria-haspopup="menu"
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold" aria-hidden="true">
                   A
                 </div>
                 <div className="hidden sm:block text-left">
                   <p className="text-sm font-medium">Admin</p>
-                  <p className="text-xs text-gray-500">admin@mmostore.com</p>
+                  <p className="text-xs text-gray-300">admin@mmostore.com</p>
                 </div>
               </button>
               <div className="absolute right-0 top-full mt-2 w-56 py-2 bg-[#111827] rounded-xl border border-white/10 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
@@ -439,7 +460,7 @@ function NotificationsPanel({ onClose }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-40" onClick={onClose} />
+      <div className="fixed inset-0 z-40" onClick={onClose} aria-hidden="true" />
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}

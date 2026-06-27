@@ -282,13 +282,14 @@ export default function AdminSupport() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">{t('admin.support_center')}</h1>
-          <p className="text-gray-400 text-sm mt-1">{t('admin.manage_tickets')}</p>
+          <p className="text-gray-300 text-sm mt-1">{t('admin.manage_tickets')}</p>
         </div>
-        <button 
+        <button
           onClick={() => loadTickets()}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+          aria-label={t('common.refresh')}
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className="w-4 h-4" aria-hidden="true" />
           {t('common.refresh')}
         </button>
       </div>
@@ -309,7 +310,7 @@ export default function AdminSupport() {
               </div>
               <span className="text-3xl font-bold">{loading ? '...' : stat.value}</span>
             </div>
-            <p className="text-gray-400 text-sm mt-2">{stat.label}</p>
+            <p className="text-gray-300 text-sm mt-2">{stat.label}</p>
           </motion.div>
         ))}
       </div>
@@ -425,7 +426,7 @@ export default function AdminSupport() {
                   </div>
                 </div>
                 <h3 className="font-medium">{selectedTicket.subject}</h3>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-300 mt-1">
                   Tạo bởi: {selectedTicket.user?.email || selectedTicket.customerEmail || 'Không rõ'}
                 </p>
 

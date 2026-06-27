@@ -192,32 +192,35 @@ export default function AdminTransactions() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">{t('admin.transactions')}</h1>
-          <p className="text-gray-400 text-sm mt-1">{t('admin.view_transactions')}</p>
+          <p className="text-gray-300 text-sm mt-1">{t('admin.view_transactions')}</p>
         </div>
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={() => loadTransactions()}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+            aria-label={t('common.refresh')}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
             {t('common.refresh')}
           </button>
-          <button 
+          <button
             onClick={() => loadTransactions()}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+            aria-label={t('common.refresh')}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
             {t('common.refresh')}
           </button>
-          <button 
+          <button
             onClick={exportToCSV}
             disabled={exporting}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan text-sm font-medium hover:bg-neon-cyan/20 transition-colors disabled:opacity-50"
+            aria-label="Xuất CSV"
           >
             {exporting ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
+              <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
             ) : (
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4" aria-hidden="true" />
             )}
             {exporting ? 'Đang xuất...' : 'Xuất CSV'}
           </button>
@@ -233,7 +236,7 @@ export default function AdminTransactions() {
               <ArrowUpRight className="w-6 h-6 text-green-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-400">{t('admin.total_income')}</p>
+              <p className="text-sm text-gray-300">{t('admin.total_income')}</p>
               <p className="text-2xl font-bold text-green-400">
                 {loading ? '...' : totalIncome.toLocaleString('vi-VN')}₫
               </p>
@@ -247,7 +250,7 @@ export default function AdminTransactions() {
               <ArrowDownRight className="w-6 h-6 text-red-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-400">{t('admin.total_withdrawals')}</p>
+              <p className="text-sm text-gray-300">{t('admin.total_withdrawals')}</p>
               <p className="text-2xl font-bold text-red-400">
                 {loading ? '...' : totalWithdraw.toLocaleString('vi-VN')}₫
               </p>
@@ -261,7 +264,7 @@ export default function AdminTransactions() {
               <DollarSign className="w-6 h-6 text-blue-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-400">{t('admin.total_fees')}</p>
+              <p className="text-sm text-gray-300">{t('admin.total_fees')}</p>
               <p className="text-2xl font-bold text-blue-400">
                 {loading ? '...' : totalFee.toLocaleString('vi-VN')}₫
               </p>

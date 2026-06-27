@@ -68,7 +68,7 @@ export default function AdminRevenue() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">{t('admin.revenue_analytics')}</h1>
-          <p className="text-gray-400 text-sm mt-1">{t('admin.track_earnings')}</p>
+          <p className="text-gray-300 text-sm mt-1">{t('admin.track_earnings')}</p>
         </div>
         <div className="flex items-center gap-3">
           <select
@@ -81,8 +81,8 @@ export default function AdminRevenue() {
             <option value="year">{t('admin.this_year')}</option>
             <option value="all">{t('admin.all_time')}</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-sm font-medium transition-colors">
-            <Download className="w-4 h-4" />
+          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-sm font-medium transition-colors" aria-label={t('admin.export')}>
+            <Download className="w-4 h-4" aria-hidden="true" />
             {t('admin.export')}
           </button>
         </div>
@@ -104,9 +104,9 @@ export default function AdminRevenue() {
                 {stat.change}
               </div>
             </div>
-            <p className="text-gray-400 text-sm mt-4">{t(stat.labelKey)}</p>
+            <p className="text-gray-300 text-sm mt-4">{t(stat.labelKey)}</p>
             <p className="text-2xl font-bold mt-1">{stat.value}</p>
-            <p className="text-xs text-gray-500 mt-1">{t(stat.periodKey)}</p>
+            <p className="text-xs text-gray-400 mt-1">{t(stat.periodKey)}</p>
           </motion.div>
         ))}
       </div>
@@ -122,17 +122,17 @@ export default function AdminRevenue() {
         >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="font-semibold">{t('admin.revenue_overview')}</h3>
-              <p className="text-sm text-gray-400">{t('admin.revenue_orders_overview')}</p>
+              <h2 className="font-semibold">{t('admin.revenue_overview')}</h2>
+              <p className="text-sm text-gray-300">{t('admin.revenue_orders_overview')}</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-blue-500" />
-                <span className="text-sm text-gray-400">{t('admin.revenue')}</span>
+                <div className="w-3 h-3 rounded-full bg-blue-500" aria-hidden="true" />
+                <span className="text-sm text-gray-300">{t('admin.revenue')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-cyan-400" />
-                <span className="text-sm text-gray-400">{t('admin.orders')}</span>
+                <div className="w-3 h-3 rounded-full bg-cyan-400" aria-hidden="true" />
+                <span className="text-sm text-gray-300">{t('admin.orders')}</span>
               </div>
             </div>
           </div>
@@ -170,8 +170,8 @@ export default function AdminRevenue() {
           transition={{ delay: 0.5 }}
           className="bg-[#111827] rounded-2xl border border-white/5 p-6"
         >
-          <h3 className="font-semibold mb-2">{t('admin.revenue_by_category')}</h3>
-          <p className="text-sm text-gray-400 mb-6">{t('admin.distribution_earnings')}</p>
+          <h2 className="font-semibold mb-2">{t('admin.revenue_by_category')}</h2>
+          <p className="text-sm text-gray-300 mb-6">{t('admin.distribution_earnings')}</p>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <RechartsPie>
@@ -202,8 +202,8 @@ export default function AdminRevenue() {
           <div className="grid grid-cols-1 gap-2 mt-4">
             {categoryRevenue.map((cat) => (
               <div key={cat.name} className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
-                <span className="text-xs text-gray-400 flex-1">{cat.name}</span>
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} aria-hidden="true" />
+                <span className="text-xs text-gray-300 flex-1">{cat.name}</span>
                 <span className="text-xs font-medium">{(cat.revenue/1000000).toFixed(0)}M₫</span>
               </div>
             ))}
@@ -220,8 +220,8 @@ export default function AdminRevenue() {
           transition={{ delay: 0.6 }}
           className="bg-[#111827] rounded-2xl border border-white/5 p-6"
         >
-          <h3 className="font-semibold mb-2">{t('admin.payment_methods')}</h3>
-          <p className="text-sm text-gray-400 mb-6">{t('admin.distribution_payment_types')}</p>
+          <h2 className="font-semibold mb-2">{t('admin.payment_methods')}</h2>
+          <p className="text-sm text-gray-300 mb-6">{t('admin.distribution_payment_types')}</p>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={paymentMethods} layout="vertical">
@@ -252,17 +252,17 @@ export default function AdminRevenue() {
           transition={{ delay: 0.7 }}
           className="bg-[#111827] rounded-2xl border border-white/5 p-6"
         >
-          <h3 className="font-semibold mb-2">{t('admin.top_products')}</h3>
-          <p className="text-sm text-gray-400 mb-6">{t('admin.best_performing')}</p>
+          <h2 className="font-semibold mb-2">{t('admin.top_products')}</h2>
+          <p className="text-sm text-gray-300 mb-6">{t('admin.best_performing')}</p>
           <div className="space-y-4">
             {topProducts.map((product, index) => (
               <div key={product.name} className="flex items-center gap-4">
-                <span className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-xs font-medium text-gray-400">
+                <span className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-xs font-medium text-gray-300" aria-hidden="true">
                   {index + 1}
                 </span>
                 <div className="flex-1">
                   <p className="text-sm font-medium">{product.name}</p>
-                  <p className="text-xs text-gray-500">{product.orders} {t('admin.orders')}</p>
+                  <p className="text-xs text-gray-300">{product.orders} {t('admin.orders')}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium text-green-400">{product.revenue.toLocaleString('vi-VN')}₫</p>
