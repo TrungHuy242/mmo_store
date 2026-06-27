@@ -153,6 +153,46 @@ class AssetService {
     return typeMap[ext] || 'OTHER';
   }
 
+  // List all assets (admin) - supports pagination + optional filters
+  async listAssets(query = {}) {
+    const page = Math.max(parseInt(query.page) || 1, 1);
+    const limit = Math.min(parseInt(query.limit) || 50, 200);
+
+    const where = {};
+    if (query.productId) where.productId = String(query.productId);
+    if (query.type) where.type = String(query.type);
+    if (query.search) {
+      const search = String(query.search).trim();
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { originalName: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [assets, total] = await Promise.all([
+      prisma.digitalAsset.findMany({
+        where,
+        include: {
+          product: { select: { id: true, name: true, price: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.digitalAsset.count({ where }),
+    ]);
+
+    return {
+      assets,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(Math.ceil(total / limit), 1),
+      },
+    };
+  }
+
   // Get all assets for product
   async getProductAssets(productId, { page = 1, limit = 20 } = {}) {
     const skip = (page - 1) * limit;

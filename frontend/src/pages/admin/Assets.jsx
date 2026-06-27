@@ -82,8 +82,12 @@ export default function Assets() {
         setPagination(prev => ({ ...prev, ...res.data.pagination }));
       }
     } catch (error) {
-      console.error('Failed to fetch assets:', error);
-      toast.error('Không thể tải danh sách tài liệu');
+      console.error('Failed to fetch assets:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+      toast.error('Không thể tải danh sách tài liệu. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }

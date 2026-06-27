@@ -8,42 +8,11 @@ const router = Router();
 // Get all assets (admin - for management panel)
 router.get('/', authenticate, requireAdmin, async (req, res, next) => {
   try {
-    const { page = 1, limit = 50, productId, type, search } = req.query;
-    
-    const where = {};
-    if (productId) where.productId = productId;
-    if (type) where.type = type;
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { originalName: { contains: search, mode: 'insensitive' } },
-      ];
-    }
-    
-    const [assets, total] = await Promise.all([
-      prisma.digitalAsset.findMany({
-        where,
-        include: {
-          product: {
-            select: { id: true, name: true, price: true },
-          },
-        },
-        orderBy: { createdAt: 'desc' },
-        skip: (parseInt(page) - 1) * parseInt(limit),
-        take: parseInt(limit),
-      }),
-      prisma.digitalAsset.count({ where }),
-    ]);
-    
+    const result = await assetService.listAssets(req.query);
     res.json({
       success: true,
-      data: assets,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        totalPages: Math.ceil(total / parseInt(limit)),
-      },
+      data: result.assets,
+      pagination: result.pagination,
     });
   } catch (error) {
     next(error);
