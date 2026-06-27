@@ -1,3 +1,8 @@
+// Validate environment FIRST. env.config.js calls process.exit(1) if
+// anything is missing or malformed, so it must run before anything else
+// (database connect, app import, worker startup) to guarantee a
+// fail-fast startup with a clear error message.
+import './config/env.config.js';
 import app from './app.js';
 import config from './config/index.js';
 import prisma from './database/prisma.js';
