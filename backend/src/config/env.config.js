@@ -132,6 +132,9 @@ const envSchema = z
     RATE_LIMIT_WINDOW: numericString('RATE_LIMIT_WINDOW', 15),
     RATE_LIMIT_MAX_REQUESTS: numericString('RATE_LIMIT_MAX_REQUESTS', 100),
 
+    // ── Cache ─────────────────────────────────────────────────────────────────
+    CACHE_TTL: numericString('CACHE_TTL', 300),
+
     // ── CORS ───────────────────────────────────────────────────────────────
     CORS_ORIGINS: z.string().trim().optional(),
   })
@@ -286,6 +289,10 @@ export const env = {
   rateLimit: {
     windowMs: data.RATE_LIMIT_WINDOW * 60 * 1000,
     maxRequests: data.RATE_LIMIT_MAX_REQUESTS,
+  },
+
+  cache: {
+    ttl: data.CACHE_TTL,
   },
 
   corsOrigins: data.CORS_ORIGINS

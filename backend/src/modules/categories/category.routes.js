@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate, requireAdmin } from '../../middlewares/auth.middleware.js';
 import categoryService from './category.service.js';
+import { cacheMiddleware } from '../../middlewares/cache.middleware.js';
 import { body } from 'express-validator';
 
 const router = Router();
@@ -13,8 +14,8 @@ const createValidation = [
     .withMessage('Category name must be 2-100 characters'),
 ];
 
-// Public routes
-router.get('/', async (req, res, next) => {
+// Public routes — all GETs are cached (admin mutations auto-invalidate)
+router.get('/', cacheMiddleware({ ttl: 600 }), async (req, res, next) => {
   try {
     const { hierarchical, includeInactive } = req.query;
     
@@ -32,7 +33,7 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.get('/slug/:slug', async (req, res, next) => {
+router.get('/slug/:slug', cacheMiddleware({ ttl: 600 }), async (req, res, next) => {
   try {
     const category = await categoryService.getBySlug(req.params.slug);
     

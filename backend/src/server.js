@@ -9,6 +9,7 @@ import prisma from './database/prisma.js';
 import cronJobs from './jobs/cron.js';
 import workerManager from './workers/index.js';
 import telegramService from './modules/notifications/telegram.service.js';
+import { connectRedis, disconnectRedis } from './config/redis.js';
 
 const PORT = config.port;
 
@@ -17,6 +18,9 @@ async function startServer() {
     // Test database connection
     await prisma.$connect();
     console.log('✅ Database connected successfully');
+
+    // Connect to Redis (non-blocking — server starts even if Redis is down)
+    await connectRedis();
 
     // Start cron jobs (report/cleanup only)
     cronJobs.start();
@@ -70,6 +74,7 @@ process.on('SIGINT', async () => {
   telegramService.stopBot();
   workerManager.stopAll();
   cronJobs.stop();
+  await disconnectRedis();
   await prisma.$disconnect();
   process.exit(0);
 });
@@ -79,6 +84,7 @@ process.on('SIGTERM', async () => {
   telegramService.stopBot();
   workerManager.stopAll();
   cronJobs.stop();
+  await disconnectRedis();
   await prisma.$disconnect();
   process.exit(0);
 });
