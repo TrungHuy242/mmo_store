@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +18,20 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // If we were bounced here by the 401 interceptor, ?redirect= carries the
+  // path the user was trying to reach. Honour it after a successful login.
+  const redirectTarget = searchParams.get('redirect');
+
+  const isSafeRedirect = (target) => {
+    if (!target || typeof target !== 'string') return false;
+    // Only accept same-origin absolute paths. Reject anything that looks
+    // like an absolute URL or a protocol to prevent open-redirect attacks.
+    if (!target.startsWith('/') || target.startsWith('//')) return false;
+    if (target.startsWith('/login') || target.startsWith('/register')) return false;
+    return true;
+  };
 
   const validate = () => {
     const newErrors = {};
@@ -49,9 +63,12 @@ export default function Login() {
       }
       
       toast.success(t('auth.login_success'));
-      
-      // Redirect based on role
-      if (result.isAdmin || result.role === 'SUPER_ADMIN' || result.role === 'MANAGER' || result.role === 'SUPPORT' || result.role === 'FINANCE') {
+
+      // Honour ?redirect=... if the user was bounced here by the 401
+      // interceptor. Falls back to the role-based default.
+      if (isSafeRedirect(redirectTarget)) {
+        navigate(redirectTarget, { replace: true });
+      } else if (result.isAdmin || result.role === 'SUPER_ADMIN' || result.role === 'MANAGER' || result.role === 'SUPPORT' || result.role === 'FINANCE') {
         navigate('/admin');
       } else {
         navigate('/dashboard');

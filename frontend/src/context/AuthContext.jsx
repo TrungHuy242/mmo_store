@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/client.js';
 import { useAuthStore } from '../store/index.js';
+import { registerAuthNavigator } from '../utils/auth-redirect';
 
 const AuthContext = createContext(null);
 
@@ -10,6 +12,17 @@ const isAdminRole = (role) => !!role && ADMIN_ROLES.includes(role);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  // Expose React Router's navigate to the axios 401 interceptor so it can
+  // perform a smooth client-side redirect (no full page reload) when the
+  // session expires.
+  useEffect(() => {
+    const unregister = registerAuthNavigator((to, options) => {
+      navigate(to, options);
+    });
+    return unregister;
+  }, [navigate]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -21,9 +34,15 @@ export function AuthProvider({ children }) {
         // Sync with Zustand store
         useAuthStore.getState().login?.(userData, token);
       })
-      .catch(() => {
-        localStorage.removeItem('token');
-        useAuthStore.getState().logout?.();
+      .catch((err) => {
+        // 401 on /auth/me is expected for cold-boot stale tokens - clear them
+        // silently (no toast, no redirect). Real session expirations while the
+        // app is running are handled by the response interceptor above.
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          useAuthStore.getState().logout?.();
+        }
       })
       .finally(() => setLoading(false));
   }, []);
