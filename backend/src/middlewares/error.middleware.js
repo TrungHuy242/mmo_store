@@ -20,16 +20,6 @@
  */
 
 const SERVICE_STATUS_MAP = {
-  // 400 Bad Request — malformed input, validation failure
-  'Invalid': 400,
-  'Email already registered': 400,
-  'Username already taken': 400,
-  'You have already reviewed this product': 400,
-  'You can only update your own reviews': 403,
-  'You can only delete your own reviews': 403,
-  'Password must be at least': 400,
-  'Invalid or expired reset token': 400,
-  'Invalid or expired verification token': 400,
   // 401 Unauthorized — credentials wrong
   'Invalid email or password': 401,
   'Invalid credentials': 401,
@@ -49,15 +39,34 @@ const SERVICE_STATUS_MAP = {
   'User not found': 404,
   'Not found': 404,
   'Review not found': 404,
+  // 409 Conflict
+  'Email already registered': 409,
+  'Username already taken': 409,
   // 429 Too Many Requests
   'Too many': 429,
 };
 
 function inferStatusFromMessage(message) {
+  // Match exact full string first, then by prefix as fallback
+  if (SERVICE_STATUS_MAP[message]) return SERVICE_STATUS_MAP[message];
   for (const [prefix, status] of Object.entries(SERVICE_STATUS_MAP)) {
     if (message.startsWith(prefix)) return status;
   }
   return 400; // default for service errors
+}
+
+/**
+ * Helper for throwing errors from service layer with proper HTTP status.
+ * Use this instead of plain `new Error(msg)` so the error middleware
+ * preserves the right status code instead of falling back to 400.
+ *
+ *   throw createError(401, 'Invalid email or password');
+ *   throw createError(409, 'Email already registered');
+ */
+export function createError(statusCode, message) {
+  const err = new Error(message);
+  err.statusCode = statusCode;
+  return err;
 }
 
 export default (err, req, res, next) => {

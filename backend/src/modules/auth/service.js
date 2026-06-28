@@ -6,6 +6,7 @@ import repository from './repository.js';
 import { UserRole, UserStatus, isAdminRole } from './constants.js';
 import emailService from '../notifications/email.service.js';
 import telegramService from '../notifications/telegram.service.js';
+import { createError } from '../../middlewares/error.middleware.js';
 
 class AuthService {
   generateTokens(user) {
@@ -58,11 +59,11 @@ class AuthService {
 
   async sendLoginOtp(user) {
     if (!user.telegramId) {
-      throw new Error('Tài khoản chưa liên kết Telegram. Vui lòng liên kết Telegram trước.');
+      throw createError(400, 'Tài khoản chưa liên kết Telegram. Vui lòng liên kết Telegram trước.');
     }
 
     if (!telegramService.isEnabled()) {
-      throw new Error('Dịch vụ Telegram chưa được kích hoạt.');
+      throw createError(503, 'Dịch vụ Telegram chưa được kích hoạt.');
     }
 
     // Generate and save OTP
@@ -110,13 +111,13 @@ class AuthService {
         });
         
         if (recentOtp.attempts >= 4) {
-          throw new Error('Quá nhiều lần thử. Vui lòng yêu cầu mã mới.');
+          throw createError(429, 'Quá nhiều lần thử. Vui lòng yêu cầu mã mới.');
         }
-        
-        throw new Error('Mã xác thực không đúng.');
+
+        throw createError(400, 'Mã xác thực không đúng.');
       }
-      
-      throw new Error('Mã xác thực đã hết hạn hoặc không tồn tại.');
+
+      throw createError(400, 'Mã xác thực đã hết hạn hoặc không tồn tại.');
     }
 
     // Mark OTP as used
@@ -128,7 +129,7 @@ class AuthService {
     // Get user and generate tokens
     const user = await repository.findUserById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw createError(404, 'User not found');
     }
 
     const tokens = this.generateTokens(user);
@@ -142,7 +143,7 @@ class AuthService {
   async resendLoginOtp(userId) {
     const user = await repository.findUserById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw createError(404, 'User not found');
     }
 
     // Invalidate any existing OTPs
@@ -165,13 +166,13 @@ class AuthService {
     // Check if user exists
     const existingUser = await repository.findUserByEmail(data.email);
     if (existingUser) {
-      throw new Error('Email already registered');
+      throw createError(409, 'Email already registered');
     }
 
     if (data.username) {
       const existingUsername = await repository.findUserByUsername(data.username);
       if (existingUsername) {
-        throw new Error('Username already taken');
+        throw createError(409, 'Username already taken');
       }
     }
 
@@ -210,26 +211,26 @@ class AuthService {
     const user = await repository.findUserByEmail(email);
     
     if (!user) {
-      throw new Error('Invalid email or password');
+      throw createError(401, 'Invalid email or password');
     }
 
     if (!user.emailVerified && isAdminRole(user.role)) {
-      throw new Error('Please verify your email first');
+      throw createError(403, 'Please verify your email first');
     }
 
     if (user.status !== UserStatus.ACTIVE) {
       if (user.status === UserStatus.SUSPENDED) {
-        throw new Error('Account is suspended');
+        throw createError(403, 'Account is suspended');
       }
       if (user.status === UserStatus.BANNED) {
-        throw new Error('Account is banned');
+        throw createError(403, 'Account is banned');
       }
-      throw new Error('Account is inactive');
+      throw createError(403, 'Account is inactive');
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      throw new Error('Invalid email or password');
+      throw createError(401, 'Invalid email or password');
     }
 
     // Update last login
@@ -257,13 +258,13 @@ class AuthService {
     // Check if token is blacklisted
     const isBlacklisted = await repository.isTokenBlacklisted(refreshToken);
     if (isBlacklisted) {
-      throw new Error('Token has been revoked');
+      throw createError(401, 'Token has been revoked');
     }
 
     // Get user
     const user = await repository.findUserById(decoded.userId);
     if (!user || user.status !== UserStatus.ACTIVE) {
-      throw new Error('User not found or inactive');
+      throw createError(401, 'User not found or inactive');
     }
 
     // Blacklist old refresh token
@@ -312,7 +313,7 @@ class AuthService {
     const user = await repository.findUserByResetToken(token);
     
     if (!user) {
-      throw new Error('Invalid or expired reset token');
+      throw createError(400, 'Invalid or expired reset token');
     }
 
     await repository.updatePassword(user.id, newPassword);
@@ -325,14 +326,14 @@ class AuthService {
 
   async changePassword(userId, currentPassword, newPassword) {
     const user = await repository.findUserById(userId);
-    
+
     if (!user) {
-      throw new Error('User not found');
+      throw createError(404, 'User not found');
     }
 
     const isValid = await bcrypt.compare(currentPassword, user.password);
     if (!isValid) {
-      throw new Error('Current password is incorrect');
+      throw createError(401, 'Current password is incorrect');
     }
 
     await repository.updatePassword(userId, newPassword);
@@ -348,7 +349,7 @@ class AuthService {
     if (data.username !== undefined) {
       const existing = await repository.findUserByUsername(data.username);
       if (existing && existing.id !== userId) {
-        throw new Error('Username already taken');
+        throw createError(409, 'Username already taken');
       }
       updateData.username = data.username;
     }
@@ -365,7 +366,7 @@ class AuthService {
   async getProfile(userId) {
     const user = await repository.findUserById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw createError(404, 'User not found');
     }
     return user;
   }
@@ -373,7 +374,7 @@ class AuthService {
   async verifyEmail(userId, token) {
     const user = await repository.verifyEmail(userId, token);
     if (!user) {
-      throw new Error('Invalid or expired verification token');
+      throw createError(400, 'Invalid or expired verification token');
     }
     return true;
   }
@@ -382,20 +383,20 @@ class AuthService {
     const user = await repository.findUserByEmail(email);
     
     if (!user) {
-      throw new Error('Invalid credentials');
+      throw createError(401, 'Invalid credentials');
     }
 
     if (!isAdminRole(user.role)) {
-      throw new Error('Access denied. Admin account required.');
+      throw createError(403, 'Access denied. Admin account required.');
     }
 
     if (user.status !== UserStatus.ACTIVE) {
-      throw new Error('Account is not active');
+      throw createError(403, 'Account is not active');
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      throw new Error('Invalid credentials');
+      throw createError(401, 'Invalid credentials');
     }
 
     await repository.updateLastLogin(user.id, ip);
@@ -421,11 +422,11 @@ class AuthService {
   async toggleTwoFactor(userId, enabled) {
     const user = await repository.findUserById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw createError(404, 'User not found');
     }
 
     if (enabled && !user.telegramId) {
-      throw new Error('Bạn cần liên kết Telegram trước khi bật xác thực 2 lớp.');
+      throw createError(400, 'Bạn cần liên kết Telegram trước khi bật xác thực 2 lớp.');
     }
 
     await prisma.user.update({
