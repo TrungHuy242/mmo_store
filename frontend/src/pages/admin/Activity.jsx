@@ -417,15 +417,15 @@ export default function ActivityIcon() {
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">ID Log</p>
+                        <p className="text-xs text-gray-500 mb-1">{t('common.id_log')}</p>
                         <p className="text-xs font-mono text-gray-300">{log.id}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">User ID</p>
+                        <p className="text-xs text-gray-500 mb-1">{t('common.user_id')}</p>
                         <p className="text-xs font-mono text-gray-300">{log.userId || 'N/A'}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Resource ID</p>
+                        <p className="text-xs text-gray-500 mb-1">{t('common.resource_id')}</p>
                         <p className="text-xs font-mono text-gray-300">{log.resourceId || 'N/A'}</p>
                       </div>
                       <div>

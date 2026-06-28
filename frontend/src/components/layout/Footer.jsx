@@ -1,29 +1,24 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const footerLinks = {
   product: [
-    { label: 'All Products', to: '/products' },
-    { label: 'Accounts', to: '/products?type=account' },
-    { label: 'Source Code', to: '/products?type=source_code' },
-    { label: 'Tools & Scripts', to: '/products?type=tool' },
+    { key: 'all_products', to: '/products' },
+    { key: 'accounts', to: '/products?type=account' },
+    { key: 'source_code', to: '/products?type=source_code' },
+    { key: 'tools_scripts', to: '/products?type=tool' },
   ],
   support: [
-    { label: 'Help Center', to: '/support' },
-    { label: 'Contact Us', to: '/support/new' },
-    { label: 'FAQs', to: '/faq' },
-    { label: 'Ticket System', to: '/tickets' },
+    { key: 'help_center', to: '/support' },
+    { key: 'contact_us', to: '/support/new' },
+    { key: 'faqs', to: '/faq' },
+    { key: 'ticket_system', to: '/tickets' },
   ],
   company: [
-    { label: 'About Us', to: '/about' },
-    { label: 'Terms of Service', to: '/terms' },
-    { label: 'Privacy Policy', to: '/privacy' },
-    { label: 'Refund Policy', to: '/refund' },
-  ],
-  resources: [
-    { label: 'Documentation', to: '/docs' },
-    { label: 'API Reference', to: '/api-docs' },
-    { label: 'Status', to: '/status' },
-    { label: 'Blog', to: '/blog' },
+    { key: 'about_us', to: '/about' },
+    { key: 'terms_of_service', to: '/terms' },
+    { key: 'privacy_policy', to: '/privacy' },
+    { key: 'refund_policy', to: '/refund' },
   ],
 };
 
@@ -58,6 +53,7 @@ const socialLinks = [
 ];
 
 export default function Footer() {
+  const { t } = useTranslation();
   return (
     <footer className="bg-bg-secondary border-t border-border">
       <div className="container-lg py-12 lg:py-16">
@@ -77,7 +73,7 @@ export default function Footer() {
               </div>
             </Link>
             <p className="text-sm text-text-secondary mb-6">
-              Premium digital marketplace for MMO tools, accounts, and source code. Instant delivery worldwide.
+              {t('footer.tagline')}
             </p>
             {/* Social Links */}
             <div className="flex items-center gap-3">
@@ -97,12 +93,12 @@ export default function Footer() {
 
           {/* Links */}
           <div>
-            <h4 className="text-sm font-semibold text-text-primary mb-4">Products</h4>
+            <h4 className="text-sm font-semibold text-text-primary mb-4">{t('footer.products_title')}</h4>
             <ul className="space-y-3">
               {footerLinks.product.map((link) => (
                 <li key={link.to}>
                   <Link to={link.to} className="text-sm text-text-secondary hover:text-primary transition-colors">
-                    {link.label}
+                    {t(`footer.${link.key}`)}
                   </Link>
                 </li>
               ))}
@@ -110,12 +106,12 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold text-text-primary mb-4">Support</h4>
+            <h4 className="text-sm font-semibold text-text-primary mb-4">{t('footer.support_title')}</h4>
             <ul className="space-y-3">
               {footerLinks.support.map((link) => (
                 <li key={link.to}>
                   <Link to={link.to} className="text-sm text-text-secondary hover:text-primary transition-colors">
-                    {link.label}
+                    {t(`footer.${link.key}`)}
                   </Link>
                 </li>
               ))}
@@ -123,12 +119,12 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold text-text-primary mb-4">Company</h4>
+            <h4 className="text-sm font-semibold text-text-primary mb-4">{t('footer.company_title')}</h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.to}>
                   <Link to={link.to} className="text-sm text-text-secondary hover:text-primary transition-colors">
-                    {link.label}
+                    {t(`footer.${link.key}`)}
                   </Link>
                 </li>
               ))}
@@ -136,14 +132,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold text-text-primary mb-4">Newsletter</h4>
+            <h4 className="text-sm font-semibold text-text-primary mb-4">{t('footer.newsletter_title')}</h4>
             <p className="text-sm text-text-secondary mb-4">
-              Get updates on new products and deals.
+              {t('footer.newsletter_desc')}
             </p>
             <form className="flex gap-2">
               <input
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t('footer.email_placeholder')}
                 className="input flex-1 py-2 px-3 text-sm"
               />
               <button className="btn btn-primary py-2 px-4">
@@ -158,17 +154,17 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-text-tertiary">
-            © {new Date().getFullYear()} MMO Store. All rights reserved.
+            {t('footer.copyright')} {new Date().getFullYear()} MMO Store. {t('footer.rights_reserved')}
           </p>
           <div className="flex items-center gap-6">
             <Link to="/privacy" className="text-sm text-text-tertiary hover:text-text-primary transition-colors">
-              Privacy
+              {t('footer.privacy')}
             </Link>
             <Link to="/terms" className="text-sm text-text-tertiary hover:text-text-primary transition-colors">
-              Terms
+              {t('footer.terms')}
             </Link>
             <Link to="/cookies" className="text-sm text-text-tertiary hover:text-text-primary transition-colors">
-              Cookies
+              {t('footer.cookies')}
             </Link>
           </div>
         </div>

@@ -789,13 +789,13 @@ function OrdersTab({ orders, loading }) {
                                         {/* License Key */}
                                         {deliveryInfo.licenseKey && (
                                           <div>
-                                            <p className="text-xs text-text-tertiary mb-1">License Key</p>
+                                            <p className="text-xs text-text-tertiary mb-1">{t('licenses.license_key_label')}</p>
                                             <div className="flex items-center gap-2">
                                               <code className="flex-1 bg-bg-primary p-3 rounded-lg text-sm font-mono text-neon-cyan break-all">
                                                 {deliveryInfo.licenseKey}
                                               </code>
                                               <button
-                                                onClick={() => copyToClipboard(deliveryInfo.licenseKey, 'License Key')}
+                                                onClick={() => copyToClipboard(deliveryInfo.licenseKey, t('licenses.license_key_label'))}
                                                 className="p-2 rounded-lg bg-neon-cyan/10 hover:bg-neon-cyan/20 transition-colors flex-shrink-0"
                                                 title="Sao chép License"
                                               >
@@ -810,13 +810,13 @@ function OrdersTab({ orders, loading }) {
                                         {/* Additional info */}
                                         {deliveryInfo.username && !deliveryInfo.email && (
                                           <div>
-                                            <p className="text-xs text-text-tertiary mb-1">Username</p>
+                                            <p className="text-xs text-text-tertiary mb-1">{t('licenses.username_label')}</p>
                                             <div className="flex items-center gap-2">
                                               <code className="flex-1 bg-bg-primary p-3 rounded-lg text-sm font-mono text-text-primary">
                                                 {deliveryInfo.username}
                                               </code>
                                               <button
-                                                onClick={() => copyToClipboard(deliveryInfo.username, 'Username')}
+                                                onClick={() => copyToClipboard(deliveryInfo.username, t('licenses.username_label'))}
                                                 className="p-2 rounded-lg bg-neon-cyan/10 hover:bg-neon-cyan/20 transition-colors flex-shrink-0"
                                               >
                                                 <svg className="w-5 h-5 text-neon-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -830,13 +830,13 @@ function OrdersTab({ orders, loading }) {
                                         {/* Password */}
                                         {deliveryInfo.password && (
                                           <div>
-                                            <p className="text-xs text-text-tertiary mb-1">Password</p>
+                                            <p className="text-xs text-text-tertiary mb-1">{t('licenses.password_label')}</p>
                                             <div className="flex items-center gap-2">
                                               <code className="flex-1 bg-bg-primary p-3 rounded-lg text-sm font-mono text-text-primary">
                                                 {deliveryInfo.password}
                                               </code>
                                               <button
-                                                onClick={() => copyToClipboard(deliveryInfo.password, 'Password')}
+                                                onClick={() => copyToClipboard(deliveryInfo.password, t('licenses.password_label'))}
                                                 className="p-2 rounded-lg bg-neon-cyan/10 hover:bg-neon-cyan/20 transition-colors flex-shrink-0"
                                               >
                                                 <svg className="w-5 h-5 text-neon-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">

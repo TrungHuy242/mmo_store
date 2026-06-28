@@ -190,7 +190,7 @@ export default function Licenses() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">License Keys</h1>
+          <h1 className="text-2xl font-bold">{t('admin.license_keys_title')}</h1>
           <p className="text-gray-300 text-sm mt-1">Quản lý license keys cho sản phẩm</p>
         </div>
         <button 
@@ -522,8 +522,8 @@ export default function Licenses() {
                   <div className="flex items-start gap-3">
                     <Hash className="w-5 h-5 text-indigo-400 mt-0.5" />
                     <div className="text-sm">
-                      <p className="text-indigo-300 font-medium mb-1">License Key Format</p>
-                      <p className="text-gray-400 font-mono">XXXX-XXXX-XXXX-XXXX</p>
+                      <p className="text-indigo-300 font-medium mb-1">{t('admin.license_key_format')}</p>
+                      <p className="text-gray-400 font-mono">{t('admin.license_key_format_example')}</p>
                       <p className="text-gray-500 text-xs mt-2">
                         Sau khi tạo, stock của sản phẩm sẽ được tự động tăng.
                       </p>

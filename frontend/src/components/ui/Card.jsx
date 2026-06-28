@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function Card({
   children,
@@ -63,6 +64,7 @@ export function CardFooter({ children, className = '' }) {
 
 // Product Card
 export function ProductCard({ product, onClick }) {
+  const { t } = useTranslation();
   const {
     name,
     price,
@@ -91,10 +93,10 @@ export function ProductCard({ product, onClick }) {
         {/* Overlay badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {stock <= 0 && (
-            <span className="badge badge-danger">Out of Stock</span>
+            <span className="badge badge-danger">{t('common.stock_out')}</span>
           )}
           {type === 'instant' && (
-            <span className="badge badge-success">Instant</span>
+            <span className="badge badge-success">{t('common.instant_badge')}</span>
           )}
         </div>
         

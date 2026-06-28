@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 const variants = {
   default: 'bg-bg-tertiary text-text-secondary',
   primary: 'bg-primary/10 text-primary',
@@ -66,11 +68,12 @@ export function StatusBadge({ status }) {
 }
 
 export function StockBadge({ stock }) {
+  const { t } = useTranslation();
   if (stock <= 0) {
-    return <Badge variant="danger">Out of Stock</Badge>;
+    return <Badge variant="danger">{t('common.stock_out')}</Badge>;
   }
   if (stock <= 5) {
-    return <Badge variant="warning" dot>Low Stock ({stock})</Badge>;
+    return <Badge variant="warning" dot>{t('common.low_stock_badge', { count: stock })}</Badge>;
   }
-  return <Badge variant="success" dot>In Stock</Badge>;
+  return <Badge variant="success" dot>{t('common.stock_in')}</Badge>;
 }

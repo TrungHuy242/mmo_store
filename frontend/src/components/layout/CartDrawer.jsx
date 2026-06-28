@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useCartStore } from '../../store';
 import { Button } from '../ui';
 
 export default function CartDrawer({ isOpen, onClose }) {
+  const { t } = useTranslation();
   const items = useCartStore((s) => s.items);
   const removeItem = useCartStore((s) => s.removeItem);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
@@ -62,8 +64,8 @@ export default function CartDrawer({ isOpen, onClose }) {
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border">
               <div>
-                <h2 className="text-lg font-semibold text-text-primary">Shopping Cart</h2>
-                <p className="text-sm text-text-secondary">{items.length} items</p>
+                <h2 className="text-lg font-semibold text-text-primary">{t('common.shopping_cart')}</h2>
+                <p className="text-sm text-text-secondary">{items.length} {t('common.items')}</p>
               </div>
               <button
                 onClick={onClose}
@@ -82,9 +84,9 @@ export default function CartDrawer({ isOpen, onClose }) {
                   <svg className="w-16 h-16 text-text-tertiary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  <h3 className="text-lg font-medium text-text-primary mb-2">Your cart is empty</h3>
-                  <p className="text-sm text-text-secondary mb-6">Add items to get started</p>
-                  <Button variant="secondary" onClick={onClose}>Browse Products</Button>
+                  <h3 className="text-lg font-medium text-text-primary mb-2">{t('common.cart_empty_title')}</h3>
+                  <p className="text-sm text-text-secondary mb-6">{t('common.cart_empty_desc')}</p>
+                  <Button variant="secondary" onClick={onClose}>{t('common.browse_products_btn')}</Button>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -171,7 +173,7 @@ export default function CartDrawer({ isOpen, onClose }) {
             {items.length > 0 && (
               <div className="border-t border-border p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-text-secondary">Subtotal</span>
+                  <span className="text-text-secondary">{t('common.subtotal')}</span>
                   <span className="text-xl font-bold text-text-primary">
                     ${subtotal.toLocaleString()}
                   </span>

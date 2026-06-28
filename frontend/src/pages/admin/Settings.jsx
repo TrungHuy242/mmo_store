@@ -180,7 +180,7 @@ function ProfileSettings() {
         animate={{ opacity: 1, y: 0 }}
         className="bg-[#111827] rounded-2xl border border-white/5 p-6 space-y-6"
       >
-        <h2 className="text-lg font-semibold">Profile</h2>
+        <h2 className="text-lg font-semibold">{t('settings.profile_title')}</h2>
         <div className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
         </div>
@@ -218,7 +218,7 @@ function ProfileSettings() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Username</label>
+          <label className="block text-sm font-medium text-gray-400 mb-2">{t('settings.username_label')}</label>
           <input
             type="text"
             value={formData.username}

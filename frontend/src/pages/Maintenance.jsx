@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function Maintenance() {
+  const { t } = useTranslation();
   const [countdown, setCountdown] = useState('');
   const [particles, setParticles] = useState([]);
 
@@ -185,7 +187,7 @@ export default function Maintenance() {
             animate={{ opacity: [1, 0.3, 1] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           />
-          <span className="text-neon-gold text-sm font-medium tracking-wider">UPGRADING IN PROGRESS</span>
+          <span className="text-neon-gold text-sm font-medium tracking-wider">{t('common.upgrading')}</span>
         </motion.div>
 
         {/* Message Box */}
@@ -218,8 +220,8 @@ export default function Maintenance() {
           transition={{ delay: 0.5 }}
         >
           <div className="flex justify-between text-xs text-gray-500 mb-2">
-            <span>PROGRESS</span>
-            <span>LOADING...</span>
+            <span>{t('common.progress')}</span>
+            <span>{t('common.loading_dots')}</span>
           </div>
           <div className="h-1 bg-white/5 rounded-full overflow-hidden">
             <motion.div
@@ -240,11 +242,11 @@ export default function Maintenance() {
         >
           <div className="glass p-4 rounded-xl border border-neon-cyan/20">
             <div className="text-neon-cyan text-2xl font-bold mb-1">24/7</div>
-            <div className="text-gray-500 text-xs uppercase tracking-wider">Availability</div>
+            <div className="text-gray-500 text-xs uppercase tracking-wider">{t('common.availability')}</div>
           </div>
           <div className="glass p-4 rounded-xl border border-neon-magenta/20">
             <div className="text-neon-magenta text-2xl font-bold mb-1">&lt;5min</div>
-            <div className="text-gray-500 text-xs uppercase tracking-wider">Downtime</div>
+            <div className="text-gray-500 text-xs uppercase tracking-wider">{t('common.downtime')}</div>
           </div>
         </motion.div>
 

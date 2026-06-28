@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const variants = {
   primary: 'bg-primary text-white hover:bg-primary-600 active:bg-primary-700 shadow-primary/25 hover:shadow-primary/40',
@@ -33,6 +34,7 @@ const Button = forwardRef(({
   as,
   ...props
 }, ref) => {
+  const { t } = useTranslation();
   const Component = as || motion.button;
 
   const isDisabled = disabled || loading;
@@ -60,7 +62,7 @@ const Button = forwardRef(({
       {loading ? (
         <>
           <Spinner size={size} />
-          <span>Loading...</span>
+          <span>{t('common.loading_dots')}</span>
         </>
       ) : (
         <>
