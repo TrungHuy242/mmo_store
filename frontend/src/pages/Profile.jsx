@@ -727,7 +727,7 @@ export default function Profile() {
                       }
                     } else {
                       if (!telegramStatus.isLinked) {
-                        toast.error('Bạn cần liên kết Telegram trước');
+                        toast.error(t('toasts.telegram_link_required'));
                         return;
                       }
                       try {

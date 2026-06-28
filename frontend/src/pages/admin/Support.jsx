@@ -154,7 +154,7 @@ export default function AdminSupport() {
       setTotalPages(pagination.totalPages || 1);
     } catch (err) {
       console.error('Failed to load tickets:', err);
-      toast.error('Không thể tải danh sách tickets');
+      toast.error(t('toasts.tickets_load_failed'));
     } finally {
       setLoading(false);
     }
@@ -168,7 +168,7 @@ export default function AdminSupport() {
       setTicketDetail(res.data?.data || res.data);
     } catch (err) {
       console.error('Failed to load ticket detail:', err);
-      toast.error('Không thể tải chi tiết ticket');
+      toast.error(t('toasts.ticket_detail_load_failed'));
     } finally {
       setDetailLoading(false);
     }

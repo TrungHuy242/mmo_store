@@ -30,7 +30,7 @@ export default function VerifyOtp() {
       setPendingUser(JSON.parse(pending));
     } else {
       // No pending user, redirect to login
-      toast.error('Phiên đăng nhập đã hết hạn');
+      toast.error(t('toasts.session_expired'));
       navigate('/login');
     }
   }, [navigate]);
@@ -117,12 +117,12 @@ export default function VerifyOtp() {
 
   const handleVerify = async (codeToVerify = code.join('')) => {
     if (codeToVerify.length !== 6) {
-      toast.error('Vui lòng nhập đủ 6 chữ số');
+      toast.error(t('toasts.enter_otp_6_digits'));
       return;
     }
 
     if (!pendingUser) {
-      toast.error('Phiên đăng nhập đã hết hạn');
+      toast.error(t('toasts.session_expired'));
       navigate('/login');
       return;
     }

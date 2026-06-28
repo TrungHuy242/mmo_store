@@ -207,7 +207,7 @@ export default function Reviews() {
       }
     } catch (err) {
       console.error('Failed to load reviews:', err);
-      toast.error('Không thể tải danh sách đánh giá');
+      toast.error(t('toasts.reviews_load_failed'));
     } finally {
       setLoading(false);
     }
@@ -227,7 +227,7 @@ export default function Reviews() {
 
     try {
       await reviewApi.delete(id);
-      toast.success('Xóa đánh giá thành công');
+      toast.success(t('toasts.review_deleted'));
       loadReviews();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Xóa đánh giá thất bại');

@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { authApi } from '../api';
 import useSEO from '../hooks/useSEO';
 
 export default function ForgotPassword() {
+  const { t } = useTranslation();
   // SEO
   useSEO({
     title: 'Quên mật khẩu',
@@ -18,7 +20,7 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email) return toast.error('Nhập email của bạn');
+    if (!email) return toast.error(t('toasts.enter_email_to_reset'));
 
     setLoading(true);
     try {

@@ -98,7 +98,7 @@ export default function Licenses() {
   // Secure file download with progress tracking
   const handleDownload = async (license, assetId) => {
     if (!assetId) {
-      toast.error('Không tìm thấy file để tải');
+      toast.error(t('toasts.file_not_found'));
       return;
     }
 
@@ -133,7 +133,7 @@ export default function Licenses() {
           setDownloadProgress(0);
         }, 1000);
 
-        toast.success('Bắt đầu tải file!');
+        toast.success(t('toasts.download_started'));
       } else {
         // Fallback: direct blob download
         const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/assets/download/${assetId}`, {
@@ -167,11 +167,11 @@ export default function Licenses() {
           setDownloadProgress(0);
         }, 1000);
 
-        toast.success('Tải file thành công!');
+        toast.success(t('toasts.download_success'));
       }
     } catch (error) {
       console.error('Download failed:', error);
-      toast.error('Tải file thất bại. Vui lòng thử lại.');
+      toast.error(t('toasts.download_failed'));
       setDownloadingId(null);
       setDownloadProgress(0);
     }

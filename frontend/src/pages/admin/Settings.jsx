@@ -144,7 +144,7 @@ function ProfileSettings() {
           phone: userData.phone || '',
         });
       } catch (err) {
-        toast.error('Không thể tải thông tin profile');
+        toast.error(t('toasts.profile_load_failed'));
       } finally {
         setLoading(false);
       }
@@ -164,7 +164,7 @@ function ProfileSettings() {
         phone: formData.phone,
       });
       
-      toast.success('Cập nhật thông tin thành công!');
+      toast.success(t('toasts.profile_updated'));
       setShowSuccess(true);
     } catch (err) {
       toast.error(err.response?.data?.error || 'Cập nhật thất bại');
@@ -264,12 +264,12 @@ function SecuritySettings() {
     e.preventDefault();
     
     if (formData.newPassword !== formData.confirmPassword) {
-      toast.error('Mật khẩu mới không khớp');
+      toast.error(t('toasts.password_mismatch'));
       return;
     }
     
     if (formData.newPassword.length < 6) {
-      toast.error('Mật khẩu mới phải có ít nhất 6 ký tự');
+      toast.error(t('toasts.password_too_short'));
       return;
     }
     
@@ -481,7 +481,7 @@ function SystemConfigSettings() {
         }
       } catch (err) {
         console.error('Failed to load settings:', err);
-        toast.error('Không thể tải cấu hình hệ thống');
+        toast.error(t('toasts.system_config_load_failed'));
       } finally {
         setLoading(false);
       }
@@ -512,7 +512,7 @@ function SystemConfigSettings() {
         content: announcementConfig.content,
       });
       
-      toast.success('Lưu cấu hình thành công!');
+      toast.success(t('toasts.system_config_saved'));
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
@@ -914,7 +914,7 @@ function BroadcastSettings() {
     e.preventDefault();
     
     if (!message.trim()) {
-      toast.error('Vui lòng nhập thông điệp');
+      toast.error(t('toasts.enter_message'));
       return;
     }
 

@@ -66,7 +66,7 @@ export default function Coupons() {
       const res = await couponApi.getAll();
       setCoupons(res.data?.data || res.data || []);
     } catch (err) {
-      toast.error('Không thể tải danh sách mã giảm giá');
+      toast.error(t('toasts.coupons_load_failed'));
     } finally {
       setLoading(false);
     }
@@ -90,13 +90,13 @@ export default function Coupons() {
     e.preventDefault();
     
     if (!formData.code || !formData.value || !formData.expiresAt) {
-      toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
+      toast.error(t('toasts.coupon_required_fields'));
       return;
     }
 
     // Validate product selection
     if (!isApplyToAll && selectedProductIds.length === 0) {
-      toast.error('Vui lòng chọn ít nhất một sản phẩm áp dụng');
+      toast.error(t('toasts.coupon_select_product'));
       return;
     }
 
@@ -115,7 +115,7 @@ export default function Coupons() {
       };
 
       await couponApi.create(payload);
-      toast.success('Tạo mã giảm giá thành công');
+      toast.success(t('toasts.coupon_created'));
       setShowModal(false);
       resetForm();
       loadCoupons();
@@ -132,10 +132,10 @@ export default function Coupons() {
     
     try {
       await couponApi.delete(id);
-      toast.success('Xóa mã giảm giá thành công');
+      toast.success(t('toasts.coupon_deleted'));
       loadCoupons();
     } catch (err) {
-      toast.error('Xóa mã giảm giá thất bại');
+      toast.error(t('toasts.coupon_delete_failed'));
     }
   };
 

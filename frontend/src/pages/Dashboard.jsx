@@ -571,7 +571,7 @@ function OrdersTab({ orders, loading }) {
         setOrderDetails(prev => ({ ...prev, [orderId]: data }));
       } catch (error) {
         console.error('Failed to fetch order details:', error);
-        toast.error('Không thể tải chi tiết đơn hàng');
+        toast.error(t('toasts.order_detail_load_failed'));
       } finally {
         setLoadingDetails(prev => ({ ...prev, [orderId]: false }));
       }
@@ -1009,7 +1009,7 @@ function AffiliateTab({ data, loading, onWithdrawSuccess }) {
       });
 
       // Success
-      toast.success('Yêu cầu rút tiền của bạn đang được duyệt!');
+      toast.success(t('toasts.withdrawal_submitted'));
       setSuccess(true);
       setWithdrawAmount('');
       setBankDetails({ bankName: '', accountNumber: '', accountHolder: '' });
@@ -1384,7 +1384,7 @@ function SettingsTab({ user }) {
         updateUser(updatedUser);
       }
       
-      toast.success('Cập nhật thông tin thành công!');
+      toast.success(t('toasts.profile_updated'));
       setProfileSuccess(true);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Cập nhật thất bại');
@@ -1398,12 +1398,12 @@ function SettingsTab({ user }) {
     e.preventDefault();
     
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error('Mật khẩu mới không khớp');
+      toast.error(t('toasts.password_mismatch'));
       return;
     }
     
     if (passwordForm.newPassword.length < 6) {
-      toast.error('Mật khẩu mới phải có ít nhất 6 ký tự');
+      toast.error(t('toasts.password_too_short'));
       return;
     }
     

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Upload, Trash2, FileText, Archive, FileCode, File, Download, Search, Filter, RefreshCw, X, Check, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { assetApi, productApi } from '../../api';
@@ -47,6 +48,7 @@ const getTypeColor = (type) => {
 };
 
 export default function Assets() {
+  const { t } = useTranslation();
   const [assets, setAssets] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +90,7 @@ export default function Assets() {
         data: error.response?.data,
         message: error.message,
       });
-      toast.error('Không thể tải danh sách tài liệu. Vui lòng thử lại sau.');
+      toast.error(t('toasts.assets_load_failed'));
     } finally {
       setLoading(false);
     }
@@ -116,7 +118,7 @@ export default function Assets() {
   // Handle file upload
   const handleUpload = async () => {
     if (!selectedFile || !uploadProductId) {
-      toast.error('Vui lòng chọn file và sản phẩm');
+      toast.error(t('toasts.select_file_and_product'));
       return;
     }
 
@@ -127,7 +129,7 @@ export default function Assets() {
       formData.append('productId', uploadProductId);
 
       await assetApi.upload(formData);
-      toast.success('Tải lên thành công!');
+      toast.success(t('toasts.asset_uploaded'));
       setUploadModal(false);
       setSelectedFile(null);
       setUploadProductId('');
@@ -146,7 +148,7 @@ export default function Assets() {
 
     try {
       await assetApi.delete(deleteModal.asset.id);
-      toast.success('Xóa tài liệu thành công!');
+      toast.success(t('toasts.asset_deleted'));
       setDeleteModal({ open: false, asset: null });
       fetchAssets();
     } catch (error) {

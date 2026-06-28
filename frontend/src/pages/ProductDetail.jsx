@@ -134,7 +134,7 @@ export default function ProductDetail() {
 
   const handleToggleWishlist = async () => {
     if (!user) {
-      toast.error('Vui lòng đăng nhập để thêm vào yêu thích');
+      toast.error(t('toasts.login_required_wishlist'));
       navigate('/login');
       return;
     }

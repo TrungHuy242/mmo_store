@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { authApi } from '../api';
 import useSEO from '../hooks/useSEO';
 
 export default function ResetPassword() {
+  const { t } = useTranslation();
   // SEO
   useSEO({
     title: 'Đặt lại mật khẩu',
@@ -25,7 +27,7 @@ export default function ResetPassword() {
   // Redirect if no token
   useEffect(() => {
     if (!token) {
-      toast.error('Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.');
+      toast.error(t('toasts.reset_link_invalid'));
       navigate('/forgot-password');
     }
   }, [token, navigate]);
@@ -57,7 +59,7 @@ export default function ResetPassword() {
     try {
       await authApi.resetPassword(token, password);
       setSuccess(true);
-      toast.success('Mật khẩu đã được cập nhật thành công!');
+      toast.success(t('toasts.password_reset_success'));
 
       // Redirect to login after 2 seconds
       setTimeout(() => {

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { useCartStore, useWishlistStore } from '../store';
 import { useAuth } from '../context/AuthContext';
 import { useCartDrawer } from '../context/CartContext';
@@ -38,6 +39,7 @@ const CountdownTimer = ({ endsAt }) => {
 
 export default function ProductCard({ product, onBuy, onAddToCart }) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const addItem = useCartStore((state) => state.addItem);
   const toggleWishlist = useWishlistStore((state) => state.toggleItem);
   const isInWishlist = useWishlistStore((state) => state.isInWishlist(product.id));
@@ -70,7 +72,7 @@ export default function ProductCard({ product, onBuy, onAddToCart }) {
     e.stopPropagation();
     
     if (!user) {
-      toast.error('Vui lòng đăng nhập để thêm vào yêu thích');
+      toast.error(t('toasts.login_required_wishlist'));
       return;
     }
     
@@ -89,7 +91,7 @@ export default function ProductCard({ product, onBuy, onAddToCart }) {
       }
     } catch (error) {
       console.error('Failed to toggle wishlist:', error);
-      toast.error('Không thể cập nhật yêu thích');
+      toast.error(t('toasts.wishlist_update_failed'));
     } finally {
       setWishlistLoading(false);
     }
@@ -100,12 +102,12 @@ export default function ProductCard({ product, onBuy, onAddToCart }) {
     e.stopPropagation();
     
     if (!user) {
-      toast.error('Vui lòng đăng nhập để mua hàng');
+      toast.error(t('toasts.login_required_buy'));
       return;
     }
     
     if (outOfStock) {
-      toast.error('Sản phẩm đã hết hàng');
+      toast.error(t('toasts.product_out_of_stock'));
       return;
     }
     
@@ -127,7 +129,7 @@ export default function ProductCard({ product, onBuy, onAddToCart }) {
       toast.success('Đã thêm vào giỏ hàng');
     } catch (error) {
       console.error('Quick buy error:', error);
-      toast.error('Không thể thêm vào giỏ hàng');
+      toast.error(t('toasts.add_cart_failed'));
     } finally {
       setQuickBuyLoading(false);
     }

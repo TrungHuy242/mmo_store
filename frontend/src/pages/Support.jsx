@@ -242,7 +242,7 @@ export default function Support() {
 
   const handleCreateTicket = async () => {
     if (!newTicket.subject.trim() || !newTicket.content.trim()) {
-      toast.error('Vui lòng nhập tiêu đề và nội dung');
+      toast.error(t('toasts.subject_message_required'));
       return;
     }
 
@@ -272,7 +272,7 @@ export default function Support() {
         priority: newTicket.priority,
       });
       
-      toast.success('Tạo ticket thành công!');
+      toast.success(t('toasts.ticket_created'));
       setShowCreateModal(false);
       setNewTicket({ subject: '', content: '', priority: 'MEDIUM' });
       setCreateAttachments([]);
@@ -320,14 +320,14 @@ export default function Support() {
   // Submit rating
   const handleSubmitRating = async () => {
     if (!selectedTicket || rating === 0) {
-      toast.error('Vui lòng chọn số sao đánh giá');
+      toast.error(t('toasts.select_rating'));
       return;
     }
 
     try {
       setSubmittingRating(true);
       await ticketApi.rate(selectedTicket.id, { rating, feedback });
-      toast.success('Cảm ơn bạn đã đánh giá!');
+      toast.success(t('toasts.review_thanks'));
       
       // Reset form
       setRating(0);

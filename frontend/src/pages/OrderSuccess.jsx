@@ -107,13 +107,13 @@ export default function OrderSuccess() {
           });
         }, 1000);
 
-        toast.success('Bắt đầu tải file!');
+        toast.success(t('toasts.download_started'));
       } else {
         throw new Error('No download URL available');
       }
     } catch (error) {
       console.error('Download failed:', error);
-      toast.error('Tải file thất bại. Vui lòng thử lại.');
+      toast.error(t('toasts.download_failed'));
       setDownloadingItems(prev => {
         const newState = { ...prev };
         delete newState[itemKey];

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { useCartStore, useWishlistStore } from '../../store';
 import { useCartDrawer } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
@@ -13,6 +14,7 @@ export const CartDrawer = () => {
   const navigate = useNavigate();
   
   const items = useCartStore((state) => state.items);
+  const { t } = useTranslation();
   const addItemToCart = useCartStore((state) => state.addItem);
   const removeItem = useCartStore((state) => state.removeItem);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
@@ -54,7 +56,7 @@ export const CartDrawer = () => {
   // Quick add from wishlist to cart
   const handleQuickAddToCart = async (product) => {
     if (!user) {
-      toast.error('Vui lòng đăng nhập để thêm vào giỏ hàng');
+      toast.error(t('toasts.login_required_cart'));
       return;
     }
 
@@ -76,7 +78,7 @@ export const CartDrawer = () => {
       toast.success(`Đã thêm "${product.name}" vào giỏ hàng!`);
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      toast.error('Không thể thêm vào giỏ hàng');
+      toast.error(t('toasts.add_cart_failed'));
     } finally {
       setAddingToCart(null);
     }
@@ -84,7 +86,7 @@ export const CartDrawer = () => {
 
   const handleCheckout = () => {
     if (!user) {
-      toast.error('Vui lòng đăng nhập để thanh toán');
+      toast.error(t('toasts.login_required_checkout'));
       navigate('/login');
       closeCart();
       return;

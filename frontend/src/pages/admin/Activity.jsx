@@ -55,7 +55,7 @@ export default function ActivityIcon() {
       setPagination(data.pagination || { page: 1, limit: 50, total: 0, totalPages: 0 });
       setFilters(data.filters || { actions: [], resources: [] });
     } catch (err) {
-      toast.error('Không thể tải nhật ký hoạt động');
+      toast.error(t('toasts.activity_log_load_failed'));
     } finally {
       setLoading(false);
     }

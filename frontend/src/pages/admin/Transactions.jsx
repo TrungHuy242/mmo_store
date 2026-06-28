@@ -45,7 +45,7 @@ export default function AdminTransactions() {
       setTotalPages(pagination.totalPages || 1);
     } catch (err) {
       console.error('Failed to load transactions:', err);
-      toast.error('Không thể tải lịch sử giao dịch');
+      toast.error(t('toasts.transactions_load_failed'));
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,7 @@ export default function AdminTransactions() {
       const allTransactions = res.success ? res.data : (res.data?.data || res.data || []);
       
       if (!allTransactions.length) {
-        toast.error('Không có dữ liệu để xuất');
+        toast.error(t('toasts.no_data_to_export'));
         return;
       }
 
@@ -153,7 +153,7 @@ export default function AdminTransactions() {
       toast.success(`Đã xuất ${allTransactions.length} giao dịch`);
     } catch (err) {
       console.error('Export error:', err);
-      toast.error('Không thể xuất file CSV');
+      toast.error(t('toasts.csv_export_failed'));
     } finally {
       setExporting(false);
     }

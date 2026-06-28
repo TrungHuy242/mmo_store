@@ -63,7 +63,7 @@ function MaskedValue({ value }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error('Không thể copy vào clipboard');
+      toast.error(t('toasts.clipboard_failed'));
     }
   };
 
@@ -110,7 +110,7 @@ function BulkAddModal({ product, onClose, onSuccess }) {
 
   const handleSubmit = async () => {
     if (uniqueLines.length === 0) {
-      toast.error('Vui lòng nhập ít nhất 1 item');
+      toast.error(t('toasts.enter_at_least_1_item'));
       return;
     }
     setLoading(true);

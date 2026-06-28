@@ -64,7 +64,7 @@ export default function Licenses() {
       const res = await licenseApi.getForProduct(selectedProduct.id, { limit: 100 });
       setLicenses(res.data?.data || res.data || []);
     } catch (err) {
-      toast.error('Không thể tải danh sách license keys');
+      toast.error(t('toasts.license_keys_load_failed'));
     } finally {
       setLoading(false);
     }
@@ -96,7 +96,7 @@ export default function Licenses() {
     e.preventDefault();
     
     if (!generateForm.productId || !generateForm.count) {
-      toast.error('Vui lòng chọn sản phẩm và số lượng');
+      toast.error(t('toasts.select_product_and_quantity'));
       return;
     }
 

@@ -51,7 +51,7 @@ function AddProductModal({ categories, onClose, onSuccess }) {
     }
     const price = Number(form.price);
     if (Number.isNaN(price) || price < 0) {
-      toast.error('Giá không hợp lệ');
+      toast.error(t('toasts.invalid_price'));
       return;
     }
     setLoading(true);
