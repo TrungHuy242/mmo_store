@@ -26,8 +26,21 @@ export default function ForgotPassword() {
       setSent(true);
       toast.success('Đã gửi hướng dẫn đặt lại mật khẩu đến email!');
     } catch (error) {
-      const message = error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
-      toast.error(message);
+      // Backend error shapes:
+      //   validation  → { success: false, errors: [{field, message}] }
+      //   service    → { success: false, error: '...' }
+      //   unexpected → err.message
+      const validationErrors = error.response?.data?.errors;
+      if (validationErrors?.length) {
+        toast.error(validationErrors[0].message);
+      } else {
+        const serverMsg =
+          error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message ||
+          'Có lỗi xảy ra. Vui lòng thử lại.';
+        toast.error(serverMsg);
+      }
     } finally {
       setLoading(false);
     }

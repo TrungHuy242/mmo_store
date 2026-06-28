@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { useTranslation } from 'react-i18next';
 import { authApi } from '../api';
 import useSEO from '../hooks/useSEO';
+
+const ADMIN_ROLES = ['SUPER_ADMIN', 'MANAGER', 'SUPPORT', 'FINANCE', 'INVENTORY_STAFF', 'MARKETING'];
+const isAdminRole = (role) => !!role && ADMIN_ROLES.includes(role);
 
 export default function VerifyOtp() {
   const { t } = useTranslation();
@@ -142,7 +144,7 @@ export default function VerifyOtp() {
         toast.success('Đăng nhập thành công!');
         
         // Redirect based on role
-        if (user.role === 'SUPER_ADMIN' || user.role === 'MANAGER' || user.role === 'SUPPORT' || user.role === 'FINANCE') {
+        if (isAdminRole(user.role)) {
           navigate('/admin');
         } else {
           navigate('/dashboard');
@@ -152,7 +154,15 @@ export default function VerifyOtp() {
         window.location.reload();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Mã xác thực không đúng');
+      // Backend error shapes:
+      //   service → { success: false, error: '...' }
+      //   unexpected → err.message
+      const serverMsg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        'Mã xác thực không đúng hoặc đã hết hạn';
+      toast.error(serverMsg);
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
     } finally {
@@ -169,7 +179,12 @@ export default function VerifyOtp() {
       toast.success('Đã gửi lại mã xác thực');
       setResendCooldown(60); // 60 seconds cooldown
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Không thể gửi lại mã');
+      const serverMsg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        'Không thể gửi lại mã xác thực';
+      toast.error(serverMsg);
     } finally {
       setLoading(false);
     }
