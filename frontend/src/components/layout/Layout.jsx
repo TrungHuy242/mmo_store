@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Toaster } from 'react-hot-toast';
 import Header from './Header';
 import Footer from './Footer';
 import { CartProvider } from '../../context/CartContext';
@@ -49,6 +50,28 @@ export default function Layout() {
           <Footer />
           <CartDrawer />
           <CommandPalette />
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              style: {
+                background: '#1a1a2e',
+                color: '#fff',
+                border: '1px solid rgba(239, 68, 68, 0.5)',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                fontSize: '14px',
+                maxWidth: '420px',
+              },
+              success: {
+                iconTheme: { primary: '#22d3ee', secondary: '#fff' },
+                style: { border: '1px solid rgba(34, 211, 238, 0.5)' },
+              },
+              error: {
+                iconTheme: { primary: '#ef4444', secondary: '#fff' },
+                duration: 5000,
+              },
+            }}
+          />
         </div>
       </CartProvider>
     </ToastProvider>
