@@ -16,7 +16,6 @@ export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [apiError, setApiError] = useState(''); // inline banner for server errors
   const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -75,22 +74,13 @@ export default function Login() {
         navigate('/dashboard');
       }
     } catch (err) {
-      // Server error response shape:
-      //   validation error  → { errors: [{msg}] }
-      //   service error    → { error: '...' }
-      //   unexpected       → err.message
       const validationErrors = err.response?.data?.errors;
       const serverMsg =
         err.response?.data?.error ||
         err.response?.data?.message ||
         err.message ||
         t('auth.login_failed');
-      // Prefer inline banner for service errors; fall back to toast for validation
-      if (validationErrors?.length) {
-        toast.error(validationErrors[0].msg);
-      } else {
-        setApiError(serverMsg);
-      }
+      toast.error(serverMsg);
     } finally { 
       setLoading(false); 
     }
@@ -115,31 +105,8 @@ export default function Login() {
             <p className="text-gray-400">{t('auth.login_continue')}</p>
           </div>
 
-          {/* Inline API error banner */}
-          {apiError && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-3 rounded-xl bg-red-500/15 border border-red-500/40 flex items-start gap-3"
-            >
-              <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="text-sm text-red-300">{apiError}</p>
-              <button
-                type="button"
-                onClick={() => setApiError('')}
-                className="ml-auto text-red-400/60 hover:text-red-300 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </motion.div>
-          )}
-
           {/* Form */}
-          <form onSubmit={submit} className="space-y-5">
+          <form onSubmit={submit} noValidate className="space-y-5">
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">{t('auth.email')}</label>
@@ -155,7 +122,6 @@ export default function Login() {
                   onChange={(e) => {
                     setForm({ ...form, email: e.target.value });
                     if (errors.email) setErrors({ ...errors, email: '' });
-                    if (apiError) setApiError('');
                   }}
                 />
               </div>
@@ -177,7 +143,6 @@ export default function Login() {
                   onChange={(e) => {
                     setForm({ ...form, password: e.target.value });
                     if (errors.password) setErrors({ ...errors, password: '' });
-                    if (apiError) setApiError('');
                   }}
                 />
               </div>

@@ -67,8 +67,8 @@ export default function Layout({ children }) {
           </div>
         </div>
       </footer>
-      <Toaster 
-        position="top-right"
+      <Toaster
+        position="bottom-right"
         toastOptions={{
           style: {
             background: '#1a1a2e',
