@@ -73,7 +73,7 @@ class PaymentWorker {
             status: 'PENDING',
           },
           data: {
-            status: 'EXPIRED',
+            status: 'CANCELLED',
           },
         });
       }

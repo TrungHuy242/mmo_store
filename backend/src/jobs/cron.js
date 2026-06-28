@@ -110,7 +110,7 @@ class CronJobs {
         createdAt: { lt: sevenDaysAgo },
       },
       data: {
-        status: 'EXPIRED',
+        status: 'CANCELLED',
       },
     });
 
