@@ -6,6 +6,7 @@ import { registerAuthNavigator } from '../utils/auth-redirect';
 
 const AuthContext = createContext(null);
 
+// Must match backend/src/modules/auth/constants.js → AdminRoles exactly.
 const ADMIN_ROLES = ['SUPER_ADMIN', 'MANAGER', 'SUPPORT', 'FINANCE', 'INVENTORY_STAFF', 'MARKETING'];
 const isAdminRole = (role) => !!role && ADMIN_ROLES.includes(role);
 

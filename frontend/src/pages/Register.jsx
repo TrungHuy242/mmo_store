@@ -40,7 +40,17 @@ export default function Register() {
       toast.success(t('auth.signup_success'));
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.message || t('auth.signup_failed'));
+      const validationErrors = err.response?.data?.errors;
+      if (validationErrors?.length) {
+        toast.error(validationErrors[0].msg);
+      } else {
+        const serverMsg =
+          err.response?.data?.error ||
+          err.response?.data?.message ||
+          err.message ||
+          t('auth.signup_failed');
+        toast.error(serverMsg);
+      }
     } finally { 
       setLoading(false); 
     }

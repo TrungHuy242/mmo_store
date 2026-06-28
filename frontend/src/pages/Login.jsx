@@ -74,7 +74,21 @@ export default function Login() {
         navigate('/dashboard');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message || t('auth.login_failed'));
+      // Server error response shape:
+      //   validation error  → { errors: [{msg}] }
+      //   service error    → { error: '...' }  (error middleware wraps the Error object)
+      //   unexpected       → err.message
+      const validationErrors = err.response?.data?.errors;
+      if (validationErrors?.length) {
+        toast.error(validationErrors[0].msg);
+      } else {
+        const serverMsg =
+          err.response?.data?.error ||
+          err.response?.data?.message ||
+          err.message ||
+          t('auth.login_failed');
+        toast.error(serverMsg);
+      }
     } finally { 
       setLoading(false); 
     }
