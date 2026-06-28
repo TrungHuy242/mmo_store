@@ -1,36 +1,42 @@
 /**
- * cache.middleware.js — Redis-backed response caching middleware.
+ * cache.middleware.js — In-memory response caching middleware.
+ *
+ * Uses node-cache (backed by a Map with TTL eviction) so no external
+ * infrastructure is required. The interface mirrors the Redis version so
+ * switching back to Redis later requires only updating the import.
  *
  * Design goals:
- *   1. Zero-dependency for the rest of the app — if Redis is absent or down,
- *      requests pass through transparently (fail-open).
+ *   1. Fail-open — if the cache is unavailable, requests pass through
+ *      transparently and the app continues to work.
  *   2. Cache key includes method + path + sorted query string so unique
  *      filter combinations don't collide.
- *   3. TTL is configurable via query param ?__cache=ttl or header X-Cache-TTL.
+ *   3. TTL is configurable via option or from the TTL_OVERRIDES map.
  *   4. POST / PUT / PATCH / DELETE on the same resource invalidates all
- *      matching cache entries (pattern-based deletion).
- *   5. Includes a simple "stale-while-revalidate" variant for high-traffic
- *      read endpoints that benefit from being served even while a refresh
- *      is in flight.
+ *      matching cache entries (prefix-based deletion).
  */
 
-import { getRedis, isRedisReady } from '../config/redis.js';
+import {
+  isCacheReady,
+  cacheGet,
+  cacheSet,
+  invalidateCache,
+} from '../config/cache.js';
 import config from '../config/index.js';
 
 // ─── Default TTLs (seconds) ────────────────────────────────────────────────
 
-const DEFAULT_TTL = parseInt(config.cache?.ttl ?? '300', 10); // 5 minutes
+const DEFAULT_TTL = config.cache?.ttl ?? 300; // 5 minutes
 
 // Per-endpoint TTL overrides — extend here as new routes are cached.
 const TTL_OVERRIDES = {
   // products
-  '/api/products':                   300,   // 5 min
-  '/api/products/featured':          600,   // 10 min
-  '/api/products/top-selling':        600,   // 10 min
-  '/api/products/slug/':             300,   // 5 min
+  '/api/products':                 300,   // 5 min
+  '/api/products/featured':        600,   // 10 min
+  '/api/products/top-selling':     600,   // 10 min
+  '/api/products/slug/':          300,   // 5 min
   // categories
-  '/api/categories':                 600,   // 10 min  (admin changes are rare)
-  '/api/categories/slug/':           600,   // 10 min
+  '/api/categories':              600,   // 10 min  (admin changes are rare)
+  '/api/categories/slug/':        600,   // 10 min
 };
 
 function getTtl(path) {
@@ -67,48 +73,18 @@ function buildCacheKey(req) {
   return `cache:${method}:${basePath}${queryHash}`;
 }
 
-// ─── Invalidation helpers ───────────────────────────────────────────────────
-
-/**
- * Invalidate all cache entries whose key starts with the given prefix.
- * Used after a mutation (POST / PUT / PATCH / DELETE) to keep the cache fresh.
- */
-export async function invalidateCache(pattern) {
-  const client = getRedis();
-  if (!client || !isRedisReady()) return 0;
-
-  const prefix = `cache:${pattern}`;
-  let deleted = 0;
-
-  try {
-    // SCAN is safe for production — it doesn't block like KEYS does.
-    let cursor = '0';
-    do {
-      const [nextCursor, keys] = await client.scan(cursor, 'MATCH', `${prefix}*`, 'COUNT', 100);
-      cursor = nextCursor;
-      if (keys.length > 0) {
-        await client.del(...keys);
-        deleted += keys.length;
-      }
-    } while (cursor !== '0');
-  } catch (err) {
-    console.error('[Cache] Invalidation error:', err.message);
-  }
-
-  return deleted;
-}
-
 // ─── Express middleware ────────────────────────────────────────────────────
 
 /**
  * Creates a cache middleware that:
- *   - GET / HEAD: reads from Redis first, falls back to handler, stores result.
+ *   - GET / HEAD: reads from cache first, falls back to handler, stores result.
  *   - POST / PUT / PATCH / DELETE: invalidates matching keys after handler runs.
  *
  * Options:
- *   ttl          — override the TTL for this route (seconds). Default: route-specific.
- *   keyFn        — custom function (req) => string to override cache key generation.
- *   skip         — function (req) => boolean; return true to bypass cache for a request.
+ *   ttl     — override the TTL for this route (seconds). Default: route-specific.
+ *   keyFn   — custom function (req) => string to override cache key generation.
+ *   skip    — function (req) => boolean; return true to bypass cache for a request.
+ *   pattern — cache pattern prefix used for targeted invalidation.
  *
  * @example
  *   // Simple usage — cache products list for 5 minutes
@@ -121,13 +97,11 @@ export async function invalidateCache(pattern) {
  *     controller.getAll);
  */
 export function cacheMiddleware(options = {}) {
-  const { ttl: optionTtl, keyFn, skip } = options;
+  const { ttl: optionTtl, keyFn, skip, pattern } = options;
 
   return async (req, res, next) => {
-    const client = getRedis();
-
-    // Pass through if Redis is not available (fail-open)
-    if (!client || !isRedisReady()) {
+    // Pass through if cache is not ready (fail-open)
+    if (!isCacheReady()) {
       return next();
     }
 
@@ -142,8 +116,8 @@ export function cacheMiddleware(options = {}) {
     // ── GET / HEAD: try cache first ───────────────────────────────────
     if (req.method === 'GET' || req.method === 'HEAD') {
       try {
-        const cached = await client.get(cacheKey);
-        if (cached) {
+        const cached = await cacheGet(cacheKey);
+        if (cached !== undefined) {
           const parsed = JSON.parse(cached);
           res.set('X-Cache', 'HIT');
           res.set('X-Cache-Key', cacheKey);
@@ -166,8 +140,7 @@ export function cacheMiddleware(options = {}) {
         // Store in cache if the handler set a successful 2xx status
         if (res.statusCode >= 200 && res.statusCode < 300 && body != null) {
           serialized.data = body;
-          client
-            .setex(cacheKey, effectiveTtl, JSON.stringify(serialized))
+          cacheSet(cacheKey, serialized, effectiveTtl)
             .catch((err) => console.error('[Cache] Write error:', err.message));
         }
         res.set('X-Cache', 'MISS');
@@ -184,10 +157,10 @@ export function cacheMiddleware(options = {}) {
       const invalidateAfter = async () => {
         const basePath = req.baseUrl + req.path;
         // Strip trailing /:id so mutations on /api/products/abc invalidate /api/products
-        const pattern = basePath.replace(/\/[^/]+$/, '');
-        const deleted = await invalidateCache(pattern);
+        const invalidatePattern = basePath.replace(/\/[^/]+$/, '');
+        const deleted = await invalidateCache(`cache:${req.method}:${invalidatePattern}`);
         if (deleted > 0) {
-          console.log(`[Cache] Invalidated ${deleted} entries for ${pattern}*`);
+          console.log(`[Cache] Invalidated ${deleted} entries for ${invalidatePattern}*`);
         }
       };
 
