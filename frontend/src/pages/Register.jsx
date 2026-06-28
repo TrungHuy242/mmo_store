@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.jsx';
+import { getErrorMessage } from '../utils/errorMessage.js';
 
 export default function Register() {
   const { t } = useTranslation();
@@ -41,11 +42,7 @@ export default function Register() {
       navigate('/dashboard');
     } catch (err) {
       const validationErrors = err.response?.data?.errors;
-      const serverMsg =
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        err.message ||
-        t('auth.signup_failed');
+      const serverMsg = getErrorMessage(err, 'auth.signup_failed');
       toast.error(serverMsg);
     } finally { 
       setLoading(false); 

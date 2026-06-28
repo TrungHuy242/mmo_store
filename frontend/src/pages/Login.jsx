@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.jsx';
 import useSEO from '../hooks/useSEO';
+import { getErrorMessage } from '../utils/errorMessage.js';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -75,11 +76,7 @@ export default function Login() {
       }
     } catch (err) {
       const validationErrors = err.response?.data?.errors;
-      const serverMsg =
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        err.message ||
-        t('auth.login_failed');
+      const serverMsg = getErrorMessage(err, 'auth.login_failed');
       toast.error(serverMsg);
     } finally { 
       setLoading(false); 

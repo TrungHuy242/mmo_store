@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import i18n from '../i18n';
 import api from '../api/client.js';
 import { useAuthStore } from '../store/index.js';
 import { registerAuthNavigator } from '../utils/auth-redirect';
@@ -70,11 +71,20 @@ export function AuthProvider({ children }) {
       if (status === 403 && /admin/i.test(serverMsg)) {
         ({ token, userData, refreshToken } = await tryEndpoint('/auth/admin/login'));
       } else if (status === 429) {
-        throw new Error('Quá nhiều yêu cầu. Vui lòng chờ và thử lại sau.');
+        throw new Error(i18n.t('errors.too_many_requests'));
       } else if (status === 401 || status === 403) {
-        throw new Error(serverMsg || 'Email hoặc mật khẩu không đúng');
+        // Translate known backend strings (e.g. "Invalid email or password")
+        // into the user's current UI language.
+        const known = /invalid email or password|verify your email/i;
+        if (known.test(serverMsg)) {
+          const key = /verify your email/i.test(serverMsg)
+            ? 'errors.email_not_verified'
+            : 'errors.invalid_credentials';
+          throw new Error(i18n.t(key));
+        }
+        throw new Error(serverMsg || i18n.t('errors.invalid_credentials'));
       } else {
-        throw new Error(serverMsg || 'Đăng nhập thất bại');
+        throw new Error(serverMsg || i18n.t('auth.login_failed'));
       }
     }
 

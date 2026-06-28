@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../../utils/errorMessage.js';
 import {
   Settings, User, Bell, Lock, Globe, Mail, CreditCard,
   Database, Server, Key, Eye, EyeOff, Save, Shield, Loader2, Send, Users, MessageSquare,
@@ -167,7 +168,7 @@ function ProfileSettings() {
       toast.success(t('toasts.profile_updated'));
       setShowSuccess(true);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Cập nhật thất bại');
+      toast.error(getErrorMessage(err, 'errors.unknown_error'));
     } finally {
       setSaving(false);
     }
@@ -288,7 +289,7 @@ function SecuritySettings() {
         confirmPassword: '',
       });
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Đổi mật khẩu thất bại');
+      toast.error(getErrorMessage(err, 'errors.unknown_error'));
     } finally {
       setSaving(false);
     }
@@ -517,7 +518,7 @@ function SystemConfigSettings() {
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       console.error('Failed to save settings:', err);
-      toast.error(err.response?.data?.error || 'Lưu cấu hình thất bại');
+      toast.error(getErrorMessage(err, 'errors.unknown_error'));
     } finally {
       setSaving(false);
     }

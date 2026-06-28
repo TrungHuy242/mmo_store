@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { authApi } from '../api';
 import useSEO from '../hooks/useSEO';
+import { getErrorMessage } from '../utils/errorMessage.js';
 
 export default function ResetPassword() {
   const { t } = useTranslation();
@@ -70,12 +71,7 @@ export default function ResetPassword() {
       if (validationErrors?.length) {
         toast.error(validationErrors[0].message);
       } else {
-        const serverMsg =
-          error.response?.data?.error ||
-          error.response?.data?.message ||
-          error.message ||
-          'Có lỗi xảy ra. Vui lòng thử lại.';
-        toast.error(serverMsg);
+        toast.error(getErrorMessage(error, 'errors.unknown_error'));
       }
     } finally {
       setLoading(false);

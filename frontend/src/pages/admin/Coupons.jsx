@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../../utils/errorMessage.js';
 import {
   Ticket, Plus, Search, Trash2, Calendar, DollarSign, Percent,
   Users, ShoppingCart, RefreshCw, X, Copy, Check, Clock, ChevronDown, Package
@@ -120,7 +121,7 @@ export default function Coupons() {
       resetForm();
       loadCoupons();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Tạo mã giảm giá thất bại');
+      toast.error(getErrorMessage(err, 'toasts.coupon_create_failed'));
     } finally {
       setSubmitting(false);
     }

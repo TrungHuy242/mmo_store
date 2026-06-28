@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.jsx';
 import { authApi, profileApi } from '../api';
 import useSEO from '../hooks/useSEO';
+import { getErrorMessage } from '../utils/errorMessage.js';
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -163,8 +164,7 @@ export default function Profile() {
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
       setPasswordErrors({});
     } catch (err) {
-      const message = err.response?.data?.message || err.response?.data?.error || t('profile.change_password_failed') || 'Có lỗi xảy ra';
-      toast.error(message);
+      toast.error(getErrorMessage(err, 'profile.change_password_failed'));
     } finally {
       setLoading(false);
     }

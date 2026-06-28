@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { authApi } from '../api';
+import { getErrorMessage } from '../utils/errorMessage.js';
 import useSEO from '../hooks/useSEO';
 
 const ADMIN_ROLES = ['SUPER_ADMIN', 'MANAGER', 'SUPPORT', 'FINANCE', 'INVENTORY_STAFF', 'MARKETING'];
@@ -154,14 +155,10 @@ export default function VerifyOtp() {
         window.location.reload();
       }
     } catch (err) {
-      // Backend error shapes:
-      //   service → { success: false, error: '...' }
-      //   unexpected → err.message
-      const serverMsg =
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        err.message ||
-        'Mã xác thực không đúng hoặc đã hết hạn';
+      // Translate the backend error message into the user's UI language.
+      // Falls back to a generic "invalid OTP" key when the server returns
+      // something we don't recognise.
+      const serverMsg = getErrorMessage(err, 'errors.invalid_otp');
       toast.error(serverMsg);
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();

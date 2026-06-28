@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../../utils/errorMessage.js';
 import {
   Star, Search, Trash2, RefreshCw, MessageSquare, X,
   ChevronDown, Filter, ChevronLeft, ChevronRight, Eye
@@ -44,7 +45,7 @@ function ReplyModal({ review, onClose, onReply }) {
       toast.success('Đã gửi phản hồi');
       onClose();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Gửi phản hồi thất bại');
+      toast.error(getErrorMessage(err, 'errors.unknown_error'));
     } finally {
       setSubmitting(false);
     }
@@ -230,7 +231,7 @@ export default function Reviews() {
       toast.success(t('toasts.review_deleted'));
       loadReviews();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Xóa đánh giá thất bại');
+      toast.error(getErrorMessage(err, 'errors.unknown_error'));
     }
   };
 

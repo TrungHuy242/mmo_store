@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../../utils/errorMessage.js';
 import {
   Key, Plus, Search, RefreshCw, X, Copy, Check, Shield, 
   ShieldOff, Ban, Unlock, Monitor, Globe, Mail, Hash,
@@ -116,7 +117,7 @@ export default function Licenses() {
       loadStats();
       loadProducts();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Tạo license keys thất bại');
+      toast.error(getErrorMessage(err, 'errors.unknown_error'));
     } finally {
       setSubmitting(false);
     }
@@ -132,7 +133,7 @@ export default function Licenses() {
       loadLicenses();
       loadStats();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Vô hiệu hóa thất bại');
+      toast.error(getErrorMessage(err, 'errors.unknown_error'));
     }
   };
 
@@ -146,7 +147,7 @@ export default function Licenses() {
       loadLicenses();
       loadStats();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Thao tác thất bại');
+      toast.error(getErrorMessage(err, 'errors.unknown_error'));
     }
   };
 
