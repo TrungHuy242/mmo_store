@@ -30,6 +30,9 @@ export default function LocketGold() {
   const { user } = useAuth();
   useSEO({ title: 'Locket Gold - Kích hoạt Gold miễn phí', description: 'Kích hoạt Locket Gold miễn phí cho tài khoản Locket của bạn' });
 
+  // Don't fetch if user is not authenticated (prevents 401 → refresh loop on login page)
+  const canFetch = !!user;
+
   const [username, setUsername] = useState('');
   const [usernameInput, setUsernameInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -88,10 +91,11 @@ export default function LocketGold() {
     } catch { /* keep polling */ }
   }, [status, fetchUsage]);
 
-  useEffect(() => {
-    fetchUsage();
-    fetchConfig();
-  }, [fetchUsage, fetchConfig]);
+useEffect(() => {
+if (!canFetch) return;
+fetchUsage();
+fetchConfig();
+}, [canFetch, fetchUsage, fetchConfig]);
 
   useEffect(() => {
     if (status === STATUS_STEPS.QUEUED || status === STATUS_STEPS.PROCESSING) {
