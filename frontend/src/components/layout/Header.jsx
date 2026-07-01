@@ -206,6 +206,9 @@ export default function Header() {
                 <>
                   <NavLink to="/wishlist">{t('common.wishlist')}</NavLink>
                   <NavLink to="/licenses">{t('common.licenses')}</NavLink>
+                  <NavLink to="/locket-gold" className="flex items-center gap-1.5">
+                    <span className="text-amber-400">★</span> Locket Gold
+                  </NavLink>
                 </>
               )}
             </div>
@@ -348,6 +351,7 @@ export default function Header() {
                     </div>
                     <DropdownLink to="/dashboard" icon="home">{t('common.dashboard')}</DropdownLink>
                     <DropdownLink to="/licenses" icon="download">{t('common.licenses')}</DropdownLink>
+                    <DropdownLink to="/locket-gold" icon="star" className="text-amber-400">Locket Gold</DropdownLink>
                     <DropdownLink to="/orders" icon="receipt">{t('common.myOrders')}</DropdownLink>
                     <DropdownLink to="/wishlist" icon="heart">{t('common.wishlist')}</DropdownLink>
                     <DropdownLink to="/support" icon="chat">{t('common.support')}</DropdownLink>
@@ -417,6 +421,7 @@ export default function Header() {
                   <>
                     <MobileNavLink to="/wishlist" icon="heart">{t('common.wishlist')}</MobileNavLink>
                     <MobileNavLink to="/licenses" icon="key">{t('common.licenses')}</MobileNavLink>
+                    <MobileNavLink to="/locket-gold" icon="star" className="text-amber-400">Locket Gold</MobileNavLink>
                     <MobileNavLink to="/orders" icon="receipt">{t('common.myOrders')}</MobileNavLink>
                     <MobileNavLink to="/support" icon="chat">{t('common.support')}</MobileNavLink>
                     <MobileNavLink to="/dashboard" icon="user">{t('common.dashboard')}</MobileNavLink>

@@ -21,6 +21,7 @@ const menuItems = [
   { id: 'revenue', labelKey: 'admin.revenue', icon: TrendingUp, path: '/admin/revenue' },
   { id: 'inventory', labelKey: 'admin.inventory', icon: Boxes, path: '/admin/inventory', warning: true },
   { id: 'licenses', labelKey: 'admin.licenseKeys', icon: Key, path: '/admin/licenses' },
+  { id: 'locket-gold', labelKey: 'Locket Gold', icon: Zap, path: '/admin/locket-gold' },
   { id: 'assets', labelKey: 'admin.digitalAssets', icon: FileText, path: '/admin/assets' },
   { id: 'support', labelKey: 'admin.support', icon: Ticket, path: '/admin/support', badge: 5 },
   { id: 'reviews', labelKey: 'admin.reviews', icon: Star, path: '/admin/reviews' },

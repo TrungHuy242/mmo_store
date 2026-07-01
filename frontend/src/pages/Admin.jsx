@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../components/admin/AdminLayout.jsx';
 import Dashboard from './admin/Dashboard.jsx';
+import LocketGoldAdmin from './admin/LocketGoldAdmin.jsx';
 import Orders from './admin/Orders.jsx';
 import Products from './admin/Products.jsx';
 import Categories from './admin/Categories.jsx';
@@ -35,6 +36,7 @@ const pageComponents = {
   '/admin/activity': Activity,
   '/admin/settings': Settings,
   '/admin/reviews': Reviews,
+  '/admin/locket-gold': LocketGoldAdmin,
 };
 
 export default function Admin() {

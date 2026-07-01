@@ -12,4 +12,5 @@ export { couponApi } from './coupon.api.js';
 export { broadcastApi } from './broadcast.api.js';
 export { settingsApi } from './settings.api.js';
 export { assetApi } from './asset.api.js';
+export { locketGoldApi } from './locketGold.api.js';
 export { default as api } from './client.js';

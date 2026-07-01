@@ -8,6 +8,8 @@ import config from './config/index.js';
 import prisma from './database/prisma.js';
 import cronJobs from './jobs/cron.js';
 import workerManager from './workers/index.js';
+import { startLocketWorkers } from './modules/locket-gold/worker.js';
+import locketGoldService from './modules/locket-gold/service.js';
 import telegramService from './modules/notifications/telegram.service.js';
 
 const PORT = config.port;
@@ -25,6 +27,16 @@ async function startServer() {
     // Start worker manager (payment/delivery workers with locking)
     await workerManager.startAll();
     console.log('✅ Worker manager started');
+
+    // Start Locket Gold workers
+    if (process.env.LOCKET_GOLD_ENABLED === 'true') {
+      const config = await locketGoldService.getConfig();
+      if (config.isEnabled && config.numWorkers > 0) {
+        startLocketWorkers(config.numWorkers);
+      }
+    } else {
+      console.log('⚠️  Locket Gold service disabled (LOCKET_GOLD_ENABLED=false)');
+    }
 
     // Initialize Telegram bot listener if enabled
     if (config.telegram?.botToken) {

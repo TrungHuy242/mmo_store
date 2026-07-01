@@ -38,6 +38,7 @@ import auditRoutes from './modules/audit/routes.js';
 import broadcastRoutes from './modules/broadcast/broadcast.routes.js';
 import profileRoutes from './modules/profile/profile.routes.js';
 import settingsRoutes from './modules/settings/routes.js';
+import locketGoldRoutes from './modules/locket-gold/routes.js';
 
 // Import webhooks
 import webhookRoutes from './webhooks/index.js';
@@ -124,6 +125,7 @@ app.use('/api/audit-logs', auditRoutes);
 app.use('/api/admin/broadcast', broadcastRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/locket-gold', locketGoldRoutes);
 
 // Webhooks (outside /api, intentionally not rate limited)
 app.use('/webhooks', webhookRoutes);

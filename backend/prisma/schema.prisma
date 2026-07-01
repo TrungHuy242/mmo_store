@@ -1016,3 +1016,55 @@ model OtpCode {
   @@index([userId, type])
   @@index([expiresAt])
 }
+
+// ============================================
+// LOCKET GOLD SERVICE
+// ============================================
+
+// Global service configuration (singleton — only ever one row)
+model LocketServiceConfig {
+  id          String   @id @default(uuid())
+  isEnabled   Boolean  @default(true)
+  numWorkers  Int      @default(2)
+  dailyLimit Int      @default(5)  // requests per user per day
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// RevenueCat token sets (one per worker)
+// fetchToken + appTransaction are dumped from jailbroken iOS devices
+model LocketTokenSet {
+  id             String    @id @default(uuid())
+  name           String    @default("Token 1")
+  fetchToken     String              // RevenueCat fetch token
+  appTransaction String              // Apple App Transaction JWT
+  hashParams     String?             // Optional X-Post-Params-Hash
+  hashHeaders    String?             // Optional X-Headers-Hash
+  isSandbox      Boolean   @default(false)
+  isActive       Boolean   @default(true)
+  useCount       Int       @default(0)
+  lastUsedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("locket_token_sets")
+}
+
+// In-memory queue state is kept in memory (Map<userId, QueueItem>).
+// This table persists the history so we can show logs + stats.
+model LocketUsageLog {
+  id        String   @id @default(uuid())
+  userId    String
+  uid       String              // 28-char Locket invite code
+  username  String
+  status    String              // 'SUCCESS' | 'FAIL' | 'PROCESSING'
+  errorMsg  String?
+  nextDnsProfileId String?      // NextDNS profile ID if created
+  nextDnsProfileUrl String?     // NextDNS profile link sent to user
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@index([status])
+}

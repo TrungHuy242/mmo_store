@@ -23,6 +23,7 @@ const Checkout = lazy(() => import('./pages/Checkout'));
 const OrderSuccess = lazy(() => import('./pages/OrderSuccess'));
 const OrderInvoice = lazy(() => import('./pages/OrderInvoice'));
 const Admin = lazy(() => import('./pages/Admin'));
+const LocketGold = lazy(() => import('./pages/LocketGold'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Maintenance = lazy(() => import('./pages/Maintenance'));
@@ -178,10 +179,20 @@ export default function App() {
                 <PageTransition><Profile /></PageTransition>
               </ProtectedRoute>
             } />
+            <Route path="/locket-gold" element={
+              <ProtectedRoute>
+                <PageTransition><LocketGold /></PageTransition>
+              </ProtectedRoute>
+            } />
           </Route>
           
           {/* Admin routes - TÁCH BIỆT HOÀN TOÀN */}
           <Route path="/admin" element={
+            <ProtectedRoute adminOnly>
+              <PageTransition><Admin /></PageTransition>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/locket-gold" element={
             <ProtectedRoute adminOnly>
               <PageTransition><Admin /></PageTransition>
             </ProtectedRoute>
